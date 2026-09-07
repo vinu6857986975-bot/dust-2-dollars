@@ -1,0 +1,212 @@
+/* ParkFlow - Modern Parking Management System Styles */
+
+:root {
+  --asphalt-dark: #0f172a;
+  --asphalt-road: #1e293b;
+  --road-marking: #fbbf24;
+  --slot-available: #10b981;
+  --slot-occupied: #ef4444;
+  --slot-reserved: #f59e0b;
+  --slot-ev: #06b6d4;
+  --slot-priority: #8b5cf6;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Parking Floor Grid Canvas */
+.parking-floor-canvas {
+  background-color: #0b1120;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  position: relative;
+  min-height: 520px;
+  border-radius: 1rem;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+}
+
+/* Lane Marking */
+.road-driveway {
+  background: repeating-linear-gradient(
+    90deg,
+    #1e293b,
+    #1e293b 20px,
+    #0f172a 20px,
+    #0f172a 40px
+  );
+  position: relative;
+}
+
+.center-dash-line {
+  background-image: linear-gradient(to right, #fbbf24 60%, rgba(255,255,255,0) 0%);
+  background-position: bottom;
+  background-size: 28px 3px;
+  background-repeat: repeat-x;
+  height: 3px;
+}
+
+/* Parking Slot Card */
+.parking-slot-card {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  user-select: none;
+  cursor: pointer;
+}
+
+.parking-slot-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.slot-status-available {
+  border-color: rgba(16, 185, 129, 0.35);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+.slot-status-available:hover {
+  border-color: #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.25);
+}
+
+.slot-status-occupied {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+.slot-status-occupied:hover {
+  border-color: #ef4444;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+}
+
+.slot-status-ev {
+  border-color: rgba(6, 182, 212, 0.4);
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+.slot-status-priority {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: linear-gradient(180deg, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+}
+
+/* Pulse animation for occupied EV charging */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(6, 182, 212, 0.8);
+  }
+}
+
+.pulse-charging {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Number Plate Badge */
+.license-plate {
+  font-family: 'JetBrains Mono', monospace, monospace;
+  letter-spacing: 1px;
+  background: #020617;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.license-plate .country-code {
+  color: #38bdf8;
+  font-weight: 800;
+  font-size: 0.7rem;
+  border-right: 1px solid #334155;
+  padding-right: 4px;
+}
+
+/* Barcode visual simulation */
+.barcode-strip {
+  background: repeating-linear-gradient(
+    90deg,
+    #000,
+    #000 2px,
+    #fff 2px,
+    #fff 4px,
+    #000 4px,
+    #000 7px,
+    #fff 7px,
+    #fff 9px,
+    #000 9px,
+    #000 12px,
+    #fff 12px,
+    #fff 15px
+  );
+  height: 48px;
+  width: 100%;
+}
+
+/* Thermal Receipt Styling */
+.thermal-receipt {
+  font-family: 'Courier New', Courier, monospace;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.thermal-receipt::before,
+.thermal-receipt::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-size: 16px 8px;
+}
+
+.thermal-receipt::before {
+  top: -8px;
+  background-image: radial-gradient(circle at 8px 8px, transparent 8px, #ffffff 8px);
+}
+
+.thermal-receipt::after {
+  bottom: -8px;
+  background-image: radial-gradient(circle at 8px 0, transparent 8px, #ffffff 8px);
+}
+
+/* Print specific rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-receipt-modal,
+  #printable-receipt-modal * {
+    visibility: visible;
+  }
+  #printable-receipt-modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
