@@ -43,20 +43,20 @@ class DecisionEngine:
         quantity      = metrics.get("quantity", 0)
 
         # ── Apply composite scoring ───────────────────────────
-        scored = []
+        all_scored = []
+        feasible_scored = []
         for a in actions:
-            if not a.get("feasible"):
-                continue
-            composite = self._composite_score(a, stock, product)
-            scored.append({**a, "composite_score": composite})
+            is_feasible = bool(a.get("feasible"))
+            composite = self._composite_score(a, stock, product) if is_feasible else a.get("score", 0)
+            item = {**a, "composite_score": composite}
+            all_scored.append(item)
+            if is_feasible:
+                feasible_scored.append(item)
 
-        scored.sort(key=lambda x: -x["composite_score"])
+        feasible_scored.sort(key=lambda x: -x["composite_score"])
+        all_scored.sort(key=lambda x: (0 if x.get("feasible") else 1, -x.get("composite_score", 0)))
 
-        if not scored:
-            # fallback: include all, even non-feasible
-            scored = actions
-            scored.sort(key=lambda x: -x.get("score", 0))
-
+        scored = feasible_scored if feasible_scored else all_scored
         best          = scored[0] if scored else {}
         alternatives  = scored[1:4] if len(scored) > 1 else []
 
@@ -116,11 +116,14 @@ class DecisionEngine:
             "explanation":    explanation,
             "all_scores":     [
                 {
-                    "action":  a.get("action"),
-                    "score":   round(a.get("composite_score", a.get("score", 0)), 1),
-                    "feasible":a.get("feasible", True),
+                    "action":   a.get("action"),
+                    "score":    round(a.get("composite_score", a.get("score", 0)), 1),
+                    "feasible": a.get("feasible", True),
+                    "recovery": a.get("recovery_estimate", 0),
+                    "params":   a.get("params", {}),
+                    "description": a.get("description", ""),
                 }
-                for a in (scored if scored else actions)
+                for a in all_scored
             ],
         }
 

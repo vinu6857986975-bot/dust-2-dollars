@@ -95,10 +95,10 @@ const MockBackend = {
       if (stored) return JSON.parse(stored);
     } catch(e) {}
     return [
-      { id: 101, product_id: 1, product_name: "Men's Formal Blazer (Navy)", recommended_action: "20% Markdown + Promotional Ad Push", composite_score: 87.5, confidence: "High", status: "approved", recovery_estimate: 83966, created_at: "2026-09-09 14:32:10" },
-      { id: 102, product_id: 5, product_name: "Men's Running Shoes (Size 9)", recommended_action: "Return to Supplier (Vendor Credit)", composite_score: 94.0, confidence: "High", status: "approved", recovery_estimate: 33250, created_at: "2026-09-09 16:15:00" },
-      { id: 103, product_id: 8, product_name: "Bluetooth Earbuds (TWS)", recommended_action: "Bundle Pairing with Fast Charger", composite_score: 82.0, confidence: "Medium", status: "pending", recovery_estimate: 74250, created_at: "2026-09-10 09:20:15" },
-      { id: 104, product_id: 15, product_name: "LEGO Classic Building Set", recommended_action: "35% Flash Clearance Weekend Sale", composite_score: 85.0, confidence: "High", status: "pending", recovery_estimate: 108000, created_at: "2026-09-10 10:11:45" }
+      { id: 101, product_id: 1, product_name: "Men's Formal Blazer (Navy)", recommended_action: "20% Markdown + Promotional Ad Push", composite_score: 87.5, action_score: 87.5, confidence: "High", risk_level: "Medium", status: "approved", user_decision: "approved", estimated_recovery: 83966, recovery_estimate: 83966, recovery_amount: 83966, created_at: "2026-09-09 14:32:10" },
+      { id: 102, product_id: 5, product_name: "Men's Running Shoes (Size 9)", recommended_action: "Return to Supplier (Vendor Credit)", composite_score: 94.0, action_score: 94.0, confidence: "High", risk_level: "Low", status: "approved", user_decision: "approved", estimated_recovery: 33250, recovery_estimate: 33250, recovery_amount: 33250, created_at: "2026-09-09 16:15:00" },
+      { id: 103, product_id: 8, product_name: "Bluetooth Earbuds (TWS)", recommended_action: "Bundle Pairing with Fast Charger", composite_score: 82.0, action_score: 82.0, confidence: "Medium", risk_level: "Medium", status: "pending", user_decision: "pending", estimated_recovery: 74250, recovery_estimate: 74250, recovery_amount: 74250, created_at: "2026-09-10 09:20:15" },
+      { id: 104, product_id: 15, product_name: "LEGO Classic Building Set", recommended_action: "35% Flash Clearance Weekend Sale", composite_score: 85.0, action_score: 85.0, confidence: "High", risk_level: "High", status: "pending", user_decision: "pending", estimated_recovery: 108000, recovery_estimate: 108000, recovery_amount: 108000, created_at: "2026-09-10 10:11:45" }
     ];
   },
 
@@ -242,14 +242,21 @@ const MockBackend = {
       }
 
       const decId = Date.now();
+      const decRisk = returnFeasible ? 'Low' : (age > 180 ? 'High' : 'Medium');
       const decRecord = {
         id: decId,
         product_id: p.id,
         product_name: p.name,
+        sku: p.sku,
         recommended_action: bestAction,
         composite_score: compositeScore,
+        action_score: compositeScore,
         confidence: 'High',
+        risk_level: decRisk,
         status: 'pending',
+        user_decision: 'pending',
+        estimated_recovery: recovery,
+        recovery_amount: recovery,
         recovery_estimate: recovery,
         created_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
       };
@@ -258,6 +265,107 @@ const MockBackend = {
       decList.unshift(decRecord);
       this.saveDecisions(decList);
 
+      const allCandidateScores = [
+        {
+          action: bestAction,
+          strategy: bestAction,
+          action_name: bestAction,
+          name: bestAction,
+          score: compositeScore,
+          feasible: true,
+          recovery: recovery,
+          recovery_estimate: recovery,
+          recovery_amount: recovery,
+          description: 'Pareto optimal recovery action maximizing net capital recovery yield.'
+        },
+        {
+          action: "Bundle Deal / Combo Pairing",
+          strategy: "Bundle Deal / Combo Pairing",
+          action_name: "Bundle Deal / Combo Pairing",
+          name: "Bundle Deal / Combo Pairing",
+          score: p.category_name === 'Electronics' ? 88.0 : 78.5,
+          feasible: true,
+          recovery: Math.round(lockedVal * 1.25),
+          recovery_estimate: Math.round(lockedVal * 1.25),
+          recovery_amount: Math.round(lockedVal * 1.25),
+          description: "Bundle with high-velocity complementary SKU to preserve baseline margin."
+        },
+        {
+          action: "Flash Promotion (48h Push)",
+          strategy: "Flash Promotion (48h Push)",
+          action_name: "Flash Promotion (48h Push)",
+          name: "Flash Promotion (48h Push)",
+          score: 74.0,
+          feasible: true,
+          recovery: Math.round(lockedVal * 1.18),
+          recovery_estimate: Math.round(lockedVal * 1.18),
+          recovery_amount: Math.round(lockedVal * 1.18),
+          description: "Targeted digital promotion across retail & online customer channels."
+        },
+        {
+          action: "Return to Supplier (Vendor Credit)",
+          strategy: "Return to Supplier (Vendor Credit)",
+          action_name: "Return to Supplier (Vendor Credit)",
+          name: "Return to Supplier (Vendor Credit)",
+          score: returnFeasible ? 94.0 : 15.0,
+          feasible: returnFeasible,
+          recovery: returnFeasible ? Math.round(lockedVal * 0.95) : 0,
+          recovery_estimate: returnFeasible ? Math.round(lockedVal * 0.95) : 0,
+          recovery_amount: returnFeasible ? Math.round(lockedVal * 0.95) : 0,
+          description: returnFeasible
+            ? `Within contractual return window (${p.return_window}d). 95% credit feasible.`
+            : `Blocked: Return window (${p.return_window}d) expired (${age}d old).`
+        },
+        {
+          action: "Clearance Liquidation (35% Markdown)",
+          strategy: "Clearance Liquidation (35% Markdown)",
+          action_name: "Clearance Liquidation (35% Markdown)",
+          name: "Clearance Liquidation (35% Markdown)",
+          score: age > 180 ? 85.0 : 68.0,
+          feasible: true,
+          recovery: Math.round(lockedVal * 1.10),
+          recovery_estimate: Math.round(lockedVal * 1.10),
+          recovery_amount: Math.round(lockedVal * 1.10),
+          description: "Aggressive markdown to liquidate aged stock units rapidly."
+        },
+        {
+          action: "Relocate to High-Footfall Store",
+          strategy: "Relocate to High-Footfall Store",
+          action_name: "Relocate to High-Footfall Store",
+          name: "Relocate to High-Footfall Store",
+          score: 64.0,
+          feasible: true,
+          recovery: Math.round(lockedVal * 1.05),
+          recovery_estimate: Math.round(lockedVal * 1.05),
+          recovery_amount: Math.round(lockedVal * 1.05),
+          description: "Transfer inventory to prime shelf or high-traffic branch location."
+        },
+        {
+          action: "Repackage & Reposition (Premium Gift)",
+          strategy: "Repackage & Reposition (Premium Gift)",
+          action_name: "Repackage & Reposition (Premium Gift)",
+          name: "Repackage & Reposition (Premium Gift)",
+          score: 45.0,
+          feasible: true,
+          recovery: Math.round(lockedVal * 1.02),
+          recovery_estimate: Math.round(lockedVal * 1.02),
+          recovery_amount: Math.round(lockedVal * 1.02),
+          description: "Re-label as curated gift pack to stimulate renewed buyer interest."
+        },
+        {
+          action: "Donate / Write-off (Tax Relief)",
+          strategy: "Donate / Write-off (Tax Relief)",
+          action_name: "Donate / Write-off (Tax Relief)",
+          name: "Donate / Write-off (Tax Relief)",
+          score: 18.0,
+          feasible: true,
+          recovery: Math.round(lockedVal * 0.25),
+          recovery_estimate: Math.round(lockedVal * 0.25),
+          recovery_amount: Math.round(lockedVal * 0.25),
+          description: "Donate to registered charity for corporate CSR benefit and tax offset."
+        }
+      ];
+
       return {
         status: 'ok',
         decision_id: decId,
@@ -265,31 +373,37 @@ const MockBackend = {
           decision: {
             decision: {
               recommended_action: bestAction,
+              action: bestAction,
               composite_score: compositeScore,
               confidence: 'High',
+              risk_level: decRisk,
+              estimated_recovery: recovery,
               recovery_amount: recovery,
+              recovery: recovery,
+              recovery_estimate: recovery,
               locked_capital: lockedVal,
-              liquidation_speed_days: returnFeasible ? 3 : 14
+              liquidation_speed_days: returnFeasible ? 3 : 14,
+              action_params: {
+                recommended_action: bestAction,
+                target_discount_pct: returnFeasible ? '0% (Full Vendor Credit)' : (age > 180 ? '35%' : '20%'),
+                target_selling_price: returnFeasible ? p.cost_price : Math.round(p.selling_price * (age > 180 ? 0.65 : 0.80)),
+                recovery_amount: recovery,
+                liquidation_window: returnFeasible ? '3 days' : '14 days'
+              },
+              action_description: `Execute ${bestAction} to recover ₹${recovery.toLocaleString('en-IN')} with minimal margin erosion.`
             },
             explanation: `Stock age ${age}d analyzed by cognitive swarm. Return invariant: Supplier window is ${p.return_window}d (${returnFeasible ? 'VALID - Return Feasible' : 'EXPIRED - Return Blocked'}). Pareto MCDA ranked 8 actions and selected '${bestAction}' to recover ₹${recovery.toLocaleString('en-IN')} with minimal margin erosion.`,
             alternatives: [
-              { action: "Bundle with Complementary SKU", score: 78.5, recovery: Math.round(lockedVal * 1.2) },
-              { action: "Relocate to High-Footfall Flagship Store", score: 68.0, recovery: Math.round(lockedVal * 1.1) },
-              { action: "Clearance Flash Sale", score: 62.0, recovery: Math.round(lockedVal * 0.95) }
+              { action: "Bundle Deal / Combo Pairing", strategy: "Bundle Deal / Combo Pairing", score: 78.5, recovery: Math.round(lockedVal * 1.25), recovery_estimate: Math.round(lockedVal * 1.25) },
+              { action: "Relocate to High-Footfall Store", strategy: "Relocate to High-Footfall Store", score: 68.0, recovery: Math.round(lockedVal * 1.05), recovery_estimate: Math.round(lockedVal * 1.05) },
+              { action: "Clearance Liquidation (35% Markdown)", strategy: "Clearance Liquidation (35% Markdown)", score: 62.0, recovery: Math.round(lockedVal * 1.10), recovery_estimate: Math.round(lockedVal * 1.10) }
             ],
-            all_scores: [
-              { strategy: bestAction, score: compositeScore, feasible: true },
-              { strategy: "Bundle Pairing", score: 78.5, feasible: true },
-              { strategy: "Relocate Location", score: 68.0, feasible: true },
-              { strategy: "Return to Supplier", score: returnFeasible ? 94.0 : 15.0, feasible: returnFeasible },
-              { strategy: "Clearance Flash Sale", score: 62.0, feasible: true },
-              { strategy: "Hold / No Action", score: 20.0, feasible: true }
-            ]
+            all_scores: allCandidateScores
           },
           agent_trace: [
             { step: 'Stock Agent', status: 'ok', duration_ms: 12, summary: `Aging ${age}d evaluated. Velocity: ${p.monthly_sales} units/mo.` },
             { step: 'Product Agent', status: 'ok', duration_ms: 8, summary: `Category ${p.category_name}. Gross margin headroom: ₹${p.selling_price - p.cost_price}.` },
-            { step: 'Strategy Agent', status: 'ok', duration_ms: 15, summary: `Contract Guardrail: Return window ${p.return_window}d (${returnFeasible ? 'Feasible' : 'Blocked'}). 7 actions synthesized.` },
+            { step: 'Strategy Agent', status: 'ok', duration_ms: 15, summary: `Contract Guardrail: Return window ${p.return_window}d (${returnFeasible ? 'Feasible' : 'Blocked'}). 8 candidate actions synthesized.` },
             { step: 'Decision Engine', status: 'ok', duration_ms: 22, summary: `Pareto MCDA Rank #1: ${bestAction} (Score: ${compositeScore}).` }
           ]
         }
@@ -790,7 +904,7 @@ const App = {
         </td>
         <td><strong style="color:var(--amber)">${d.recommended_action}</strong></td>
         <td><span class="badge ${d.confidence==='High'?'badge-healthy':'badge-amber'}">${d.confidence}</span></td>
-        <td class="font-mono" style="color:var(--emerald)">${fmt.currency(d.estimated_recovery)}</td>
+        <td class="font-mono" style="color:var(--emerald)">${fmt.currency(d.estimated_recovery ?? d.recovery_estimate ?? d.recovery_amount ?? 0)}</td>
         <td>${decisionBadge(d.user_decision)}</td>
       </tr>`).join('');
   },
@@ -1066,9 +1180,16 @@ const App = {
       riskEl.innerHTML = `<span class="badge ${rc[dec.risk_level]||'badge-pending'}">${dec.risk_level||'Medium'} Risk</span>`;
     }
 
-    // Recovery
+    // Recovery - robust mapping across all backend and mock response formats
     const recovEl = document.getElementById('decisionRecovery');
-    if (recovEl) recovEl.textContent = fmt.currency(dec.estimated_recovery);
+    const estimatedRecovery =
+      dec.estimated_recovery ??
+      dec.recovery_amount ??
+      dec.recovery ??
+      dec.expected_recovery ??
+      dec.recovery_estimate ??
+      0;
+    if (recovEl) recovEl.textContent = fmt.currency(estimatedRecovery);
 
     // Explanation
     const explEl = document.getElementById('decisionExplanation');
@@ -1081,8 +1202,8 @@ const App = {
       const entries = Object.entries(params);
       paramsEl.innerHTML = entries.length ? entries.map(([k, v]) => {
         const fmtVal = (k.includes('price')||k.includes('recovery'))
-          ? fmt.currency(v)
-          : k.includes('pct') ? fmt.pct(v) : v;
+          ? (typeof v === 'number' ? fmt.currency(v) : v)
+          : k.includes('pct') ? (typeof v === 'number' ? fmt.pct(v) : v) : v;
         return `<div class="info-row">
           <span class="info-row-label">${k.replace(/_/g,' ')}</span>
           <span class="info-row-value">${fmtVal}</span>
@@ -1093,17 +1214,21 @@ const App = {
     // Score Bars
     const barsEl = document.getElementById('scoreBarsList');
     if (barsEl) {
-      const sorted = [...scores].sort((a, b) => b.score - a.score);
-      barsEl.innerHTML = sorted.map((s, i) => `
+      const sorted = [...scores].sort((a, b) => (b.score || b.composite_score || 0) - (a.score || a.composite_score || 0));
+      barsEl.innerHTML = sorted.map((s, i) => {
+        const actionTitle = s.action || s.strategy || s.action_name || s.name || s.label || s.title || 'Action';
+        const actionScore = Math.round(Number(s.score ?? s.composite_score ?? 0));
+        return `
         <div class="score-bar-row">
           <div class="score-bar-name ${!s.feasible?'opacity-50':''}">
-            ${!s.feasible?'🚫 ':''}${s.action}
+            ${!s.feasible?'🚫 ':''}${actionTitle}
           </div>
           <div class="score-bar-track">
-            <div class="score-bar-fill ${i===0?'top':''}" data-target="${Math.round(s.score)}"></div>
+            <div class="score-bar-fill ${i===0?'top':''}" data-target="${actionScore}"></div>
           </div>
-          <div class="score-bar-val">${Math.round(s.score)}</div>
-        </div>`).join('');
+          <div class="score-bar-val">${actionScore}</div>
+        </div>`;
+      }).join('');
       requestAnimationFrame(() => {
         document.querySelectorAll('.score-bar-fill').forEach(bar => {
           bar.style.width = (bar.dataset.target || 0) + '%';
@@ -1114,12 +1239,17 @@ const App = {
     // Alternatives
     const altEl = document.getElementById('alternativesList');
     if (altEl) {
-      altEl.innerHTML = alts.length ? alts.map(a => `
+      altEl.innerHTML = alts.length ? alts.map(a => {
+        const altAction = a.action || a.strategy || a.action_name || a.name || 'Alternative';
+        const altRecovery = a.recovery ?? a.estimated_recovery ?? a.recovery_estimate ?? a.recovery_amount ?? 0;
+        const altScore = Math.round(Number(a.score ?? a.composite_score ?? 0));
+        return `
         <div class="alt-card">
-          <div class="alt-card-action">${a.action}</div>
-          <div class="alt-card-score">Score: ${Math.round(a.score)} &nbsp;·&nbsp; Recovery: ${fmt.currency(a.recovery)}</div>
-        </div>`).join('')
-        : '<div class="text-muted" style="font-size:0.84rem">No alternatives scored</div>';
+          <div class="alt-card-action">${altAction}</div>
+          <div class="alt-card-score">Score: ${altScore} &nbsp;·&nbsp; Recovery: ${fmt.currency(altRecovery)}</div>
+        </div>`;
+      }).join('')
+      : '<div class="text-muted" style="font-size:0.84rem">No alternatives scored</div>';
     }
 
     // Store decision ID
@@ -1197,7 +1327,7 @@ const App = {
             </div>
             <div class="decision-card-explanation">${d.reasoning||'Analysis complete.'}</div>
             <div class="decision-card-footer">
-              <span style="color:var(--emerald);font-weight:700">${fmt.currency(d.estimated_recovery)} potential recovery</span>
+              <span style="color:var(--emerald);font-weight:700">${fmt.currency(d.estimated_recovery ?? d.recovery_estimate ?? d.recovery_amount ?? 0)} potential recovery</span>
               <span class="decision-card-time">${new Date(d.created_at).toLocaleDateString('en-IN')}</span>
             </div>
           </div>`;
@@ -1225,10 +1355,10 @@ const App = {
           <div class="info-row"><span class="info-row-label">Product</span><span class="info-row-value">${d.product_name}</span></div>
           <div class="info-row"><span class="info-row-label">SKU</span><span class="info-row-value font-mono">${d.sku}</span></div>
           <div class="info-row"><span class="info-row-label">Recommendation</span><span class="info-row-value" style="color:var(--amber)">${d.recommended_action}</span></div>
-          <div class="info-row"><span class="info-row-label">Score</span><span class="info-row-value">${Math.round(d.action_score)}/100</span></div>
+          <div class="info-row"><span class="info-row-label">Score</span><span class="info-row-value">${Math.round(d.action_score ?? d.composite_score ?? 0)}/100</span></div>
           <div class="info-row"><span class="info-row-label">Confidence</span><span class="info-row-value">${d.confidence}</span></div>
           <div class="info-row"><span class="info-row-label">Risk Level</span><span class="info-row-value">${d.risk_level}</span></div>
-          <div class="info-row"><span class="info-row-label">Est. Recovery</span><span class="info-row-value" style="color:var(--emerald)">${fmt.currency(d.estimated_recovery)}</span></div>
+          <div class="info-row"><span class="info-row-label">Est. Recovery</span><span class="info-row-value" style="color:var(--emerald)">${fmt.currency(d.estimated_recovery ?? d.recovery_estimate ?? d.recovery_amount ?? 0)}</span></div>
           <div class="info-row"><span class="info-row-label">Status</span><span class="info-row-value">${decisionBadge(d.user_decision)}</span></div>
         </div>
         <div class="explanation-box" style="margin-bottom:1.25rem">
