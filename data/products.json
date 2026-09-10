@@ -1,0 +1,26 @@
+[
+  {
+    "sku": "JKT-WTR-001",
+    "name": "Winter Down Parka",
+    "category": "Apparel",
+    "cost": 1500,
+    "price": 2499,
+    "supplier": "Nordic Weavers Ltd"
+  },
+  {
+    "sku": "SW-CHR-002",
+    "name": "Smart Fitness Watch Gen 2",
+    "category": "Electronics",
+    "cost": 2200,
+    "price": 4499,
+    "supplier": "PulseTech Global"
+  },
+  {
+    "sku": "BOO-LTH-003",
+    "name": "Chelsea Leather Boots",
+    "category": "Footwear",
+    "cost": 1800,
+    "price": 3299,
+    "supplier": "UrbanStride Footwear"
+  }
+]
