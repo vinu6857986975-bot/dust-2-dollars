@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: dust-2-dollar
+    env: python
+    buildCommand: "pip install -r dead-stock-agent/requirements.txt"
+    startCommand: "cd dead-stock-agent && python server.py"
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8001

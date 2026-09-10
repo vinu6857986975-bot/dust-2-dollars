@@ -1,0 +1,22 @@
+﻿# Executables & binaries
+*.exe
+cloudflared.exe
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment
+.env

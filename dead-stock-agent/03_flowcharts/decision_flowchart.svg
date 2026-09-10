@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#080B10"/>
+  <text x="350" y="35" fill="#A5B4FC" font-size="18" font-weight="bold" font-family="system-ui" text-anchor="middle">Decision Logic &amp; Hard Constraint Tree</text>
+  
+  <g transform="translate(250, 60)">
+    <rect width="200" height="40" rx="6" fill="#1E293B" stroke="#6366F1"/>
+    <text x="100" y="24" fill="#E2E8F0" font-size="12" text-anchor="middle">Candidate: Return to Supplier?</text>
+  </g>
+  
+  <path d="M350,100 L350,140" stroke="#6366F1" stroke-width="2"/>
+  
+  <g transform="translate(230, 140)">
+    <polygon points="120,0 240,40 120,80 0,40" fill="#312E81" stroke="#818CF8"/>
+    <text x="120" y="36" fill="#fff" font-size="11" text-anchor="middle">Stock Age &lt;=</text>
+    <text x="120" y="50" fill="#fff" font-size="11" text-anchor="middle">Return Window?</text>
+  </g>
+  
+  <path d="M230,180 L140,180 L140,240" stroke="#EF4444" stroke-width="2"/>
+  <text x="175" y="172" fill="#F87171" font-size="11">NO</text>
+  <g transform="translate(60, 240)">
+    <rect width="160" height="50" rx="6" fill="#450A0A" stroke="#EF4444"/>
+    <text x="80" y="24" fill="#FCA5A5" font-size="11" font-weight="bold" text-anchor="middle">DROP ACTION</text>
+    <text x="80" y="38" fill="#FCA5A5" font-size="9" text-anchor="middle">Violates Contract SLA</text>
+  </g>
+  
+  <path d="M470,180 L560,180 L560,240" stroke="#10B981" stroke-width="2"/>
+  <text x="505" y="172" fill="#34D399" font-size="11">YES</text>
+  <g transform="translate(480, 240)">
+    <rect width="160" height="50" rx="6" fill="#064E3B" stroke="#10B981"/>
+    <text x="80" y="24" fill="#6EE7B7" font-size="11" font-weight="bold" text-anchor="middle">FEASIBLE ACTION</text>
+    <text x="80" y="38" fill="#6EE7B7" font-size="9" text-anchor="middle">Assigned Feasibility Score</text>
+  </g>
+</svg>

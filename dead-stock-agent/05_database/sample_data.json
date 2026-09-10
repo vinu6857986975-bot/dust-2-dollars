@@ -1,0 +1,83 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "sku": "JKT-WTR-001",
+      "name": "Winter Parka Nordic Down",
+      "category": "Apparel",
+      "brand": "Nordic Weavers",
+      "cost_price": 1500.0,
+      "selling_price": 2499.0,
+      "supplier_id": 1
+    },
+    {
+      "id": 2,
+      "sku": "SW-CHR-002",
+      "name": "Smart Fitness Watch Gen 2",
+      "category": "Electronics",
+      "brand": "PulseTech",
+      "cost_price": 2200.0,
+      "selling_price": 4499.0,
+      "supplier_id": 2
+    },
+    {
+      "id": 3,
+      "sku": "BOO-LTH-003",
+      "name": "Leather Ankle Chelsea Boots",
+      "category": "Footwear",
+      "brand": "UrbanStride",
+      "cost_price": 1800.0,
+      "selling_price": 3299.0,
+      "supplier_id": 3
+    }
+  ],
+  "inventory": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "quantity": 42,
+      "location": "Warehouse North",
+      "stock_since": "2026-04-15",
+      "age_days": 147
+    },
+    {
+      "id": 2,
+      "product_id": 2,
+      "quantity": 28,
+      "location": "Central Hub",
+      "stock_since": "2026-08-10",
+      "age_days": 30
+    },
+    {
+      "id": 3,
+      "product_id": 3,
+      "quantity": 65,
+      "location": "Warehouse South",
+      "stock_since": "2026-03-01",
+      "age_days": 192
+    }
+  ],
+  "suppliers": [
+    {
+      "id": 1,
+      "name": "Nordic Weavers Ltd",
+      "return_allowed": 1,
+      "return_window_days": 30,
+      "restocking_fee_pct": 10.0
+    },
+    {
+      "id": 2,
+      "name": "PulseTech Global",
+      "return_allowed": 1,
+      "return_window_days": 45,
+      "restocking_fee_pct": 5.0
+    },
+    {
+      "id": 3,
+      "name": "UrbanStride Footwear",
+      "return_allowed": 0,
+      "return_window_days": 0,
+      "restocking_fee_pct": 0.0
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	System	Architecture
+Document
+Version	1.0
+	|	Agentic	AI	Construction	Planning	Platform
+1.	Purpose
+Construct-AI	estimates	construction	material	quantities,	costs,	suppliers,	and
+procurement	plans	from	a	building	image	or	floor-plan	input,	using	a	multi-agent	AI
+pipeline	backed	by	deterministic	calculation	and	verification	logic.	This	document
+describes	the	overall	system	architecture,	component	responsibilities,	and	data	flow.
+2.	High-Level	Architecture
+The	system	is	split	into	four	independently	deployable	layers:
+Layer
+Technology
+Responsibility
+Frontend
+React	+	Vite	+	Tailwind
+User	interaction,	uploads,
+dashboards
+Backend	API
+Python	+	FastAPI
+Auth,	orchestration	entry
+point,	REST	endpoints
+Agent	Layer
+LangGraph	+	LLM
+Reasoning,	planning,	tool
+invocation
+Data	Layer
+PostgreSQL	+	ChromaDB
+Persistent	state,	vector
+search	(RAG)
+																					USER
+																							│
+																							▼
+																REACT	FRONTEND
+																							│
+																							▼
+																		FASTAPI	API
+																							│
+																							▼
+														AUTH	/	VALIDATION
+																							│
+																							▼
+													ORCHESTRATOR	AGENT	(LangGraph)
+																							│
+								┌──────────────┼ ───────────────┐
+								▼														▼															▼
+			Vision	Agent			Estimation	Agent		Planning	Agent
+								│														│															│
+								▼														▼															▼
+
+=== PAGE 2 ===
+			Vision	Model			Calculation	Engine		Rule	Engine
+								└──────────────┼ ───────────────┘
+																							▼
+																Material	Agent
+																							▼
+																		Cost	Agent
+																							▼
+																Supplier	Agent
+																							▼
+																Delivery	Agent
+																							▼
+														Verification	Agent
+																							│
+																┌──────┴──────┐
+																▼													▼
+													SUCCESS							FAILURE	→	Replan
+																▼
+										User	Approval	→	Procurement	Plan
+2.1	Design	Principle:	LLM	Does	Not	Calculate
+The	single	most	important	architectural	rule	in	this	system:	
+the	LLM	never
+performs	engineering	calculations	or	pricing	arithmetic	directly.
+LLM		→		Reasoning	/	Planning		→		Tool	Call		→		Python	Calculation	Engine
+		
+→		Verified	Result
+The	LLM’s	job	is	limited	to	intent	parsing,	orchestration	decisions,	and	natural-
+language	summarization.	All	quantity	math	(cement	bags,	steel	tonnage,	cost	totals)
+is	executed	by	deterministic	Python	functions	in	
+calculations/
+,	called	as	tools.	This
+keeps	results	reproducible,	auditable,	and	defensible	—	critical	for	anything	touching
+cost	or	engineering	estimates.
+3.	Component	Breakdown
+3.1	Frontend	(React	+	Vite	+	Tailwind)
+Renders	dashboards,	upload	flows,	agent-activity	visualizations,	and	approval
+dialogs.
+Talks	to	the	backend	exclusively	through	the	REST	API	defined	in	
+docs/02_api_reference.md
+.
+Maintains	client-side	auth	state	via	
+AuthContext
+	and	project	state	via	
+ProjectContext
+.
+3.2	Backend	API	(FastAPI)
+Stateless	request	handling;	issues	JWTs;	validates	payloads	via	Pydantic	schemas.
+Delegates	all	AI/estimation	work	to	the	Agent	Layer	—	the	API	layer	itself	contains
+no	business	logic	beyond	CRUD	and	auth.
+Persists	uploaded	images	to	
+/uploads
+	(or	object	storage	in	production)	and	stores
+metadata	in	PostgreSQL.
+3.3	Agent	Layer	(LangGraph	Orchestration)
+A	directed	graph	of	specialized	agents,	each	with	a	narrow	responsibility:
+
+=== PAGE 3 ===
+Agent
+Input
+Output
+Intent	Agent
+Raw	user	request
+Structured	intent/task	type
+Vision	Agent
+Building	image
+Structured	building
+attributes	(rooms,	doors,
+floor	area	estimate)
+Estimation	Agent
+Building	attributes
+Raw	material	quantities
+(via	calculation	tools)
+Material	Agent
+Raw	quantities
+Normalized	material	list
+with	units
+Cost	Agent
+Material	list
+Costed	material	list	(via
+price	DB,	not	LLM)
+Supplier	Agent
+Costed	materials	+	location
+Ranked	supplier	list
+Planning	Agent
+Materials	+	project	stage
+Phased	procurement	plan
+Delivery	Agent
+Supplier	+	plan
+Delivery	batching	schedule
+Verification	Agent
+All	prior	outputs
+Pass/fail	+	list	of
+inconsistencies
+Orchestrator
+—
+Coordinates	the	above,
+triggers	replanning	on
+failure
+3.4	Data	Layer
+PostgreSQL
+	—	source	of	truth:	users,	projects,	materials,	suppliers,	prices,
+procurement,	and	a	full	
+agent_logs
+	audit	trail.
+ChromaDB
+	—	vector	store	for	RAG	lookups	(construction	codes,	supplier	catalogs,
+reference	documents)	that	ground	agent	reasoning	without	hallucinated	facts.
+4.	Data	Flow	(End	to	End)
+1.	
+User	registers/logs	in	→	JWT	issued.
+2.	
+User	creates	a	project	(name,	building	type,	plot	area,	location)	and	uploads	an
+image	and/or	floor	plan.
+3.	
+Frontend	calls	
+POST	/api/analysis/run
+,	which	invokes	the	Orchestrator.
+4.	
+Orchestrator	sequences:	Intent	→	Vision	→	Estimation	→	Material	→	Cost	→	Supplier
+→	Planning	→	Delivery	→	Verification.
+5.	
+Verification	either	passes	(result	surfaced	to	user)	or	fails	(Orchestrator	triggers	a
+bounded	replan	loop	on	the	specific	failing	stage	—	not	a	full	restart).
+6.	
+User	reviews	materials,	costs,	and	supplier	recommendations	in	the	UI,	then
+approves	a	procurement	plan.
+7.	
+Every	agent	step	is	logged	to	
+agent_logs
+	for	traceability.
+5.	Cross-Cutting	Concerns
+Auth
+:	JWT-based;	passwords	hashed	(bcrypt/argon2)	in	
+security/password.py
+.
+Explainability
+:	every	agent	output	is	logged	with	its	inputs,	so	any	number	in	the
+UI	can	be	traced	back	to	the	tool	call	that	produced	it.
+
+=== PAGE 4 ===
+Human-in-the-loop
+:	procurement	is	never	auto-executed;	the	user	must
+explicitly	approve.
+Disclaimers
+:	all	material/cost	estimates	are	prominently	labeled	preliminary	and
+subject	to	review	by	a	qualified	engineer	—	this	is	a	planning	aid,	not	an
+engineering	sign-off.
+6.	Deployment
+Frontend	and	backend	are	containerized	separately
+(
+docker/frontend.Dockerfile
+,	
+docker/backend.Dockerfile
+)	and	composed	via	
+docker-compose.yml
+.
+PostgreSQL	and	ChromaDB	run	as	their	own	services	in	the	compose	network.
+Environment-specific	secrets	(DB	URL,	JWT	secret,	LLM	API	keys)	are	injected	via	
+.env
+	files,	never	committed	to	source	control.
+7.	Related	Documents
+02_api_reference.md
+	—	full	REST	endpoint	specification
+03_agent_design.md
+	—	per-agent	prompt	contracts,	I/O	schemas,	and	failure
+handling
+04_database_schema.md
+	—	full	table	definitions	and	relationships
+05_setup_and_deployment.md
+	—	local	dev	setup,	environment	variables,	Docker
+instructions
+06_frontend_spec.md
+	—	page-by-page	frontend	specification
+

@@ -1,0 +1,484 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	API	Reference
+Base	URL:
+	
+/api
+	|	
+Auth:
+	Bearer	JWT	in	
+Authorization
+	header	unless	noted
+otherwise
+1.	Auth
+POST	/api/auth/register
+Create	a	new	user	account.
+Body
+Response	201
+POST	/api/auth/login
+Body
+Response	200
+GET	/api/auth/me
+Returns	the	authenticated	user’s	profile.	Requires	JWT.
+2.	Projects
+POST	/api/projects
+Create	a	project.
+Body
+{
+	
+"name"
+:
+	
+"string"
+,
+	
+"email"
+:
+	
+"string"
+,
+	
+"password"
+:
+	
+"string"
+	
+}
+{
+	
+"id"
+:
+	
+1
+,
+	
+"name"
+:
+	
+"string"
+,
+	
+"email"
+:
+	
+"string"
+	
+}
+{
+	
+"email"
+:
+	
+"string"
+,
+	
+"password"
+:
+	
+"string"
+	
+}
+{
+	
+"access_token"
+:
+	
+"jwt-string"
+,
+	
+"token_ty pe"
+:
+	
+"bearer"
+	
+}
+{
+		
+"project_name"
+:
+	
+"string"
+,
+		
+"building_ty pe"
+:
+	
+"residential	|	commercial"
+,
+
+=== PAGE 2 ===
+GET	/api/projects
+List	all	projects	for	the	authenticated	user.
+GET	/api/projects/{project_id}
+Retrieve	a	single	project	with	its	latest	analysis	status.
+DELETE	/api/projects/{project_id}
+Delete	a	project	and	cascade-delete	its	dependent	records.
+3.	Analysis
+POST	/api/analysis/upload
+Multipart	upload	of	a	construction	image	or	floor	plan.
+Form	fields:
+	
+project_id
+,	
+file
+	(image/jpeg,	image/png,	application/pdf)
+Response	200
+POST	/api/analysis/run
+Triggers	the	agent	orchestration	pipeline	for	a	project.
+Body
+Response	202
+	—	analysis	is	asynchronous;	poll	or	subscribe	for	status.
+GET	/api/analysis/{project_id}
+Returns	current/latest	analysis	result,	including	per-agent	status	(useful	for	the	Agent
+Activity	panel).
+		
+"plot_area"
+:
+	
+1500
+,
+		
+"built_up_area"
+:
+	
+1200
+,
+		
+"location"
+:
+	
+"string"
+}
+{
+	
+"image_id"
+:
+	
+12
+,
+	
+"url"
+:
+	
+"/uploads/12.jpg"
+	
+}
+{
+	
+"project_id"
+:
+	
+5
+	
+}
+{
+	
+"run_id"
+:
+	
+"uuid"
+,
+	
+"status"
+:
+	
+"started"
+	
+}
+{
+		
+"status"
+:
+	
+"in_progress	|	completed	|	failed"
+,
+		
+"agents"
+:
+	
+[
+				
+{
+	
+"name"
+:
+	
+"vision_agent"
+,
+	
+"status"
+:
+	
+"done"
+,
+	
+"output"
+:
+	
+{
+. . .
+}
+	
+}
+,
+				
+{
+	
+"name"
+:
+	
+"cost_agent"
+,
+	
+"status"
+:
+	
+"running"
+	
+}
+		
+]
+}
+
+=== PAGE 3 ===
+4.	Materials
+GET	/api/materials/{project_id}
+Returns	the	estimated	material	list	for	a	project.
+5.	Suppliers
+GET	/api/suppliers
+Query	params:	
+material
+,	
+location
+,	
+radius_km
+Response
+GET	/api/suppliers/{supplier_id}
+Supplier	detail,	including	inventory	and	historical	pricing.
+6.	Procurement
+POST	/api/procurement/quote
+Generates	a	quotation	from	selected	suppliers.
+Body
+POST	/api/procurement/approve
+User	approves	a	procurement/delivery	plan.	This	is	the	only	endpoint	that	transitions	a
+plan	from	“proposed”	to	“active”	—	no	agent	can	call	this	itself.
+Body
+{
+		
+"materials"
+:
+	
+[
+				
+{
+	
+"name"
+:
+	
+"Cement"
+,
+	
+"quantity "
+:
+	
+250
+,
+	
+"unit"
+:
+	
+"bags"
+,
+	
+"cost"
+:
+	
+100000
+	
+}
+,
+				
+{
+	
+"name"
+:
+	
+"Sand"
+,
+	
+"quantity "
+:
+	
+32
+,
+	
+"unit"
+:
+	
+"m3"
+,
+	
+"cost"
+:
+	
+28800
+	
+}
+		
+]
+,
+		
+"disclaimer"
+:
+	
+"Preliminary 	estimate	—	review	required	by 	a	qualified
+	
+engineer."
+}
+[
+		
+{
+	
+"name"
+:
+	
+"ABC	Materials"
+,
+	
+"price"
+:
+	
+380
+,
+	
+"distance_km"
+:
+	
+5
+,
+	
+"in_stock"
+:
+	
+true
+,
+	
+"rating"
+:
+	
+4.2
+	
+}
+]
+{
+	
+"project_id"
+:
+	
+5
+,
+	
+"supplier_selections"
+:
+	
+[
+{
+	
+"material_id"
+:
+	
+1
+,
+	
+"supplier_id"
+:
+	
+3
+	
+}
+]
+	
+}
+
+=== PAGE 4 ===
+GET	/api/procurement/{project_id}
+Returns	the	phased	procurement	plan	(foundation	/	structure	/	finishing)	with	delivery
+batching.
+7.	Agents	(introspection	/	debugging)
+GET	/api/agents/logs/{project_id}
+Returns	the	full	
+agent_logs
+	trail	for	a	project	—	every	agent	invocation,	its	inputs,
+outputs,	and	status.	Primarily	used	to	power	the	“Agent	Execution	Log”	UI	and	for
+debugging	replans.
+8.	Error	Format
+All	errors	follow	a	consistent	envelope:
+HTTP	Status
+Meaning
+400
+Malformed	request	body
+401
+Missing/invalid	JWT
+403
+Authenticated	but	not	authorized	for	this	resource
+404
+Resource	not	found
+422
+Semantic	validation	failure	(e.g.	negative	area)
+500
+Unhandled	server/agent	failure
+9.	Rate	Limiting	&	Async	Notes
+POST	/api/analy sis/run
+	is	long-running	(multi-agent	chain	with	LLM	+	vision	calls).
+It	returns	
+202	Accepted
+	immediately	with	a	
+run_id
+;	the	frontend	should	poll	
+GET
+	
+/api/analy sis/{project_id}
+	or	use	a	websocket/SSE	channel	(recommended
+addition	post-MVP)	to	stream	per-agent	progress	into	the	Agent	Activity	panel.
+{
+	
+"project_id"
+:
+	
+5
+,
+	
+"plan_id"
+:
+	
+9
+	
+}
+{
+	
+"error"
+:
+	
+{
+	
+"code"
+:
+	
+"VALIDATION_ERROR"
+,
+	
+"message"
+:
+	
+"string"
+,
+	
+"details"
+:
+	
+{}
+	
+}
+	
+}
+

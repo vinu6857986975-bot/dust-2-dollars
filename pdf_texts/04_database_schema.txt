@@ -1,0 +1,533 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	Database	Schema
+Document
+Engine:
+	PostgreSQL	|	
+Vector	store:
+	ChromaDB	(separate,	for	RAG	only)
+1.	Entity	Relationship	Overview
+USERS
+		└──	PROJECTS
+								├──	BUILDINGS
+								├──	IMAGES
+								├──	BUILDING_ANALYSIS
+								├──	MATERIALS		────	MATERIAL_PRICES	────	SUPPLIERS	────
+	
+SUPPLIER_INVENTORY
+								├──	QUOTATIONS
+								├──	PROCUREMENT_ORDERS
+								├──	DELIVERY_PLANS
+								└──	AGENT_LOGS
+2.	Table	Definitions
+users
+Column
+Type
+Notes
+id
+SERIAL	PK
+name
+VARCHAR(100)
+email
+VARCHAR(150)
+UNIQUE,	NOT	NULL
+password_hash
+TEXT
+bcrypt/argon2	hash
+created_at
+TIMESTAMP
+default	now()
+projects
+Column
+Type
+Notes
+id
+SERIAL	PK
+user_id
+INTEGER
+FK	→	users(id)
+project_name
+VARCHAR(200)
+building_type
+VARCHAR(100)
+e.g.	residential,	commercial
+floor_area
+FLOAT
+
+=== PAGE 2 ===
+location
+VARCHAR(255)
+created_at
+TIMESTAMP
+default	now()
+buildings
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+plot_area
+FLOAT
+built_up_area
+FLOAT
+floors
+INTEGER
+images
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+file_path
+TEXT
+local	path	or	object	storage	key
+image_type
+VARCHAR(50)
+‘photo’	or	‘floor_plan’
+uploaded_at
+TIMESTAMP
+default	now()
+building_analysis
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+rooms
+INTEGER
+doors
+INTEGER
+windows
+INTEGER
+estimated_floor_area
+FLOAT
+confidence
+FLOAT
+0–1,	from	Vision	Agent
+created_at
+TIMESTAMP
+default	now()
+materials
+Column
+Type
+Notes
+id
+SERIAL	PK
+name
+VARCHAR(100)
+e.g.	Cement,	Steel
+unit
+VARCHAR(50)
+bags,	m3,	tonnes,	nos
+category
+VARCHAR(100)
+structural,	finishing,	etc.
+
+=== PAGE 3 ===
+material_prices
+Column
+Type
+Notes
+id
+SERIAL	PK
+material_id
+INTEGER
+FK	→	materials(id)
+supplier_id
+INTEGER
+FK	→	suppliers(id)
+price
+FLOAT
+updated_at
+TIMESTAMP
+default	now()
+suppliers
+Column
+Type
+Notes
+id
+SERIAL	PK
+name
+VARCHAR(200)
+phone
+VARCHAR(30)
+address
+TEXT
+latitude
+FLOAT
+longitude
+FLOAT
+rating
+FLOAT
+supplier_inventory
+Column
+Type
+Notes
+id
+SERIAL	PK
+supplier_id
+INTEGER
+FK	→	suppliers(id)
+material_id
+INTEGER
+FK	→	materials(id)
+stock_status
+VARCHAR(50)
+in_stock,	low_stock,	out_of_stock
+updated_at
+TIMESTAMP
+default	now()
+quotations
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+total_cost
+FLOAT
+status
+VARCHAR(50)
+draft,	sent,	accepted
+created_at
+TIMESTAMP
+default	now()
+procurement_orders
+
+=== PAGE 4 ===
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+phase
+VARCHAR(100)
+foundation,	structure,	finishing
+status
+VARCHAR(50)
+proposed,	approved,	ordered
+approved_by
+INTEGER
+FK	→	users(id),	nullable	until	approved
+created_at
+TIMESTAMP
+default	now()
+delivery_plans
+Column
+Type
+Notes
+id
+SERIAL	PK
+procurement_order_id
+INTEGER
+FK	→	procurement_orders(id)
+batch_name
+VARCHAR(100)
+e.g.	“Delivery	1”
+materials
+JSONB
+list	of	material_ids	in	this	batch
+scheduled_date
+DATE
+agent_logs
+Column
+Type
+Notes
+id
+SERIAL	PK
+project_id
+INTEGER
+FK	→	projects(id)
+agent_name
+VARCHAR(100)
+action
+TEXT
+input_data
+JSONB
+output_data
+JSONB
+status
+VARCHAR(50)
+started,	done,	failed
+created_at
+TIMESTAMP
+default	now()
+3.	Reference	
+schema.sql
+	(core	tables)
+CREATE
+	
+TABLE
+	users	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				n ame	
+VARCHAR
+(
+100
+)	
+NOT
+	
+NULL
+,
+				email	
+VARCHAR
+(
+150
+)	
+UNI QUE
+	
+NOT
+	
+NULL
+,
+				password_hash	TEXT	
+NOT
+	
+NULL
+,
+				created_at	
+TIMESTAMP
+	
+DEFAULT
+	
+CURRENT_TIMESTAMP
+);
+CREATE
+	
+TABLE
+	projects	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				user_id	
+INTEGER
+	
+REFERENCES
+	users(
+id
+),
+				project_n ame	
+VARCHAR
+(
+200
+),
+
+=== PAGE 5 ===
+The	remaining	tables	(
+buildin gs
+,	
+images
+,	
+buildin g_an alysis
+,	
+supplier_in ven tory
+,	
+quotation s
+,	
+procuremen t_orders
+,	
+delivery_plan s
+)
+follow	the	same	pattern	and	should	be	added	to	
+database/schema.sql
+	as	the
+corresponding	features	are	built,	per	the	MVP-first	development	order	in	
+05_setup_an d_deploymen t.md
+.
+4.	Indexing	Notes
+Index	
+projects.user_id
+,	
+material_prices.material_id
+,	
+material_prices.supplier_id
+,	and	
+agen t_logs.project_id
+	—	these	are	the	hot
+lookup	paths	for	dashboards	and	the	analysis	pipeline.
+suppliers(latitude,	lon gitude)
+	should	use	PostGIS	or	a	simple	bounding-box
+index	once	supplier	search	volume	justifies	it;	for	MVP,	a	haversine	calculation	in
+Python	is	sufficient.
+				buildin g_type	
+VARCHAR
+(
+100
+),
+				floor_area	
+FLOAT
+,
+				location 	
+VARCHAR
+(
+255
+),
+				created_at	
+TIMESTAMP
+	
+DEFAULT
+	
+CURRENT_TIMESTAMP
+);
+CREATE
+	
+TABLE
+	materials	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				n ame	
+VARCHAR
+(
+100
+)	
+NOT
+	
+NULL
+,
+				un it	
+VARCHAR
+(
+50
+),
+				
+category
+	
+VARCHAR
+(
+100
+)
+);
+CREATE
+	
+TABLE
+	suppliers	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				n ame	
+VARCHAR
+(
+200
+),
+				phon e	
+VARCHAR
+(
+30
+),
+				address	TEXT,
+				latitude	
+FLOAT
+,
+				lon gitude	
+FLOAT
+,
+				ratin g	
+FLOAT
+);
+CREATE
+	
+TABLE
+	material_prices	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				material_id	
+INTEGER
+	
+REFERENCES
+	materials(
+id
+),
+				supplier_id	
+INTEGER
+	
+REFERENCES
+	suppliers(
+id
+),
+				price	
+FLOAT
+,
+				updated_at	
+TIMESTAMP
+	
+DEFAULT
+	
+CURRENT_TIMESTAMP
+);
+CREATE
+	
+TABLE
+	agen t_logs	(
+				
+id
+	SERIAL	
+PRI MARY
+	
+KEY
+,
+				project_id	
+INTEGER
+	
+REFERENCES
+	projects(
+id
+),
+				agen t_n ame	
+VARCHAR
+(
+100
+),
+				action 	TEXT,
+				in put_data	JSONB,
+				output_data	JSONB,
+				status	
+VARCHAR
+(
+50
+),
+				created_at	
+TIMESTAMP
+	
+DEFAULT
+	
+CURRENT_TIMESTAMP
+);
+

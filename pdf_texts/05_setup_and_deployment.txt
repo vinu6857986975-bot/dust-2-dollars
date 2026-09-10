@@ -1,0 +1,262 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	Setup,	Development
+Order	&	Deployment	Guide
+1.	MVP	Folder	Structure
+Don’t	build	all	~100	files	up	front.	Start	here	and	expand	once	each	layer	works	end
+to	end:
+construct-ai/
+├──	frontend/
+│			├──	src/
+│			│			├──	components/		(Navbar,	UploadBox,	AgentS tatus,	MaterialTable,
+	
+CostS ummary)
+│			│			├──	pages/							(Home,	Dashboard,	NewProject,	Analysis)
+│			│			├──	services/				(api.js)
+│			│			├──	App.jsx,	main.jsx,	index.css
+│			├──	package.json,	.env
+├──	backend/
+│			├──	app/
+│			│			├──	main.py,	database.py
+│			│			├──	api/										(projects.py,	analysis.py)
+│			│			├──	agents/								(orchestrator,	vision,	estimation,	material,
+	
+cost,	supplier,	verification)
+│			│			├──	tools/									(quantity_calculator,	cost_calculator,
+	
+supplier_search)
+│			│			├──	calculations/		(cement,	sand,	bricks,	steel)
+│			│			└──	vision/								(detector.py)
+│			├──	uploads/,	requirements.txt
+├──	database/
+│			└──	schema.sql
+├──	README.md
+└──	.gitignore
+2.	Recommended	Build	Order
+1.	
+React	frontend	shell	(routing,	empty	pages)
+2.	
+FastAPI	backend	skeleton	(health	check,	DB	connection)
+3.	
+Image	upload	endpoint	+	storage
+4.	
+Vision	Agent	(start	with	a	stub	returning	fixed	structured	output,	then	wire	real
+detection)
+5.	
+Manual	dimension	input	(fallback	when	vision	confidence	is	low)
+6.	
+Estimation	calculation	engine	(
+calculations/
+)
+7.	
+Material	Agent	(normalize	output)
+8.	
+Cost	Agent	(wire	to	a	seeded	
+material_prices
+	table)
+9.	
+Supplier	database	(seed	data,	then	real	supplier	onboarding)
+10.	
+Supplier	Agent	(ranking	logic)
+
+=== PAGE 2 ===
+11.	
+Verification	Agent	(sanity	checks	before	anything	touches	the	UI)
+12.	
+Orchestrator	(wire	the	LangGraph	state	machine	across	all	of	the	above)
+13.	
+Procurement	Agent	+	phased	plan
+14.	
+Agent	Activity	UI	(the	demo-critical	piece)
+15.	
+Authentication	+	PostgreSQL	(if	not	done	earlier)
+16.	
+Docker	+	deployment
+Building	the	Orchestrator	
+after
+	individual	agents	work	standalone	is	intentional	—	it’s
+much	easier	to	debug	one	agent’s	tool	calls	in	isolation	than	to	debug	a	multi-agent
+graph	where	every	node	is	still	unreliable.
+3.	Local	Development	Setup
+3.1	Backend
+Minimum	
+requirements.txt
+	for	the	MVP:
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic
+python-jose[cryptography]
+passlib[bcrypt]
+langgraph
+langchain
+opencv-python
+python-multipart
+3.2	Frontend
+3.3	Database
+4.	Environment	Variables
+cd
+	backend
+python
+	
+-m
+	venv	venv
+source
+	venv/bin/activate										
+#	Windows:	venv\Scripts\activate
+pip
+	install	
+-r
+	requirements.txt
+cp
+	.env.example	.env														
+#	fill	in	DB_URL,	JWT_SEC RET,
+	
+LLM_API_KEY
+uvicorn
+	app.main:app	
+--reload
+	
+--port
+	8000
+cd
+	frontend
+npm
+	install
+cp
+	.env.example	.env														
+#	set
+	
+VITE_API_BASE_URL=http://localhost:8000
+npm
+	run	dev
+createdb
+	construct_ai
+psql
+	
+-d
+	construct_ai	
+-f
+	database/schema.sql
+psql
+	
+-d
+	construct_ai	
+-f
+	database/seed.sql			
+#	sample	suppliers/materials
+	
+for	local	testing
+
+=== PAGE 3 ===
+backend/.env
+DATABAS E_URL=postgresql://user:password@localhost:5432/construct_ai
+JWT_S ECRET=change-me
+JWT_EXPIRE_MINUTES =1440
+LLM_PROVIDER=openai								#	or	gemini	/	local
+LLM_API_KEY=sk-...
+UPLOAD_DIR=./uploads
+CHROMA_DB_PATH=./chroma_store
+frontend/.env
+VITE_API_BAS E_URL=http://localhost:8000
+5.	Docker	Deployment
+docker-compose.yml	(structure)
+6.	Testing	Checklist	Before	Demo/Submission
+Upload	flow	accepts	image	+	optional	floor	plan
+Vision	Agent	returns	structured	output	with	a	confidence	score,	and	low	confidence
+prompts	for	manual	input
+Estimation	numbers	trace	back	to	a	specific	function	in	
+calculations/
+	(not	LLM-
+generated)
+Cost	numbers	trace	back	to	
+material_prices
+,	not	the	LLM
+Supplier	ranking	visibly	considers	price	+	distance	+	stock,	not	price	alone
+Verification	Agent	can	fail	a	run	and	trigger	a	visible	replan
+Every	agent	step	appears	in	the	Agent	Execution	Log
+Material	and	cost	pages	carry	the	“preliminary	estimate,	engineer	review	required”
+disclaimer
+Procurement	only	becomes	“active”	after	explicit	user	approval
+services
+:
+		
+frontend
+:
+				
+build
+:
+	./docker/frontend.Dockerfile
+				
+ports
+:
+	
+[
+"5173:5173"
+]
+		
+backend
+:
+				
+build
+:
+	./docker/backend.Dockerfile
+				
+ports
+:
+	
+[
+"8000:8000"
+]
+				
+env_file
+:
+	./backend/.env
+				
+depends_on
+:
+	
+[
+db
+]
+		
+db
+:
+				
+image
+:
+	postgres:16
+				
+environment
+:
+						
+POS TGRES _DB
+:
+	construct_ai
+						
+POS TGRES _PAS S WORD
+:
+	change-me
+				
+volumes
+:
+	
+[
+"pgdata:/var/lib/postgresql/data"
+]
+volumes
+:
+		
+pgdata
+:
+docker
+	compose	up	
+--build
+
+=== PAGE 4 ===
+7.	Post-MVP	Roadmap
+Authentication	hardening	→	Supplier	onboarding	tooling	→	RAG	over	local	building
+codes	→	real-time	agent	status	via	websockets/SSE	→	mobile-responsive	UI	→	multi-
+user	project	collaboration.
+

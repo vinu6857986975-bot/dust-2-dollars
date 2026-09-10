@@ -1,141 +1,83 @@
-# 🚗 ParkFlow — Smart Parking Management System
+# 🏗️ Construct-AI — Autonomous Multi-Agent Construction Planning Platform
 
-An interactive, responsive, and production-ready **Parking Management System** web application designed for commercial parking complexes, shopping malls, airports, and corporate towers.
-
----
-
-## ✨ Features
-
-- 🗺️ **Interactive Multi-Level Floor Grid**:
-  - Live bay visualization across **Ground Floor (Level 1)**, **Basement B1**, and **Level 3 EV Charging Hub**.
-  - Color-coded bays: **Green** (Available), **Red** (Occupied), **Cyan** (EV Charging with pulsating status), **Purple** (Priority/Accessible).
-  - Click any bay to immediately park or inspect/check-out.
-  - Filter by floor level or vehicle classification (Sedan, SUV, Two-Wheeler, EV, Priority).
-  - Real-time search by bay ID or license plate.
-
-- 🎟️ **Smart Vehicle Check-In & Entry Pass**:
-  - Automatic license plate validation & uppercase formatting.
-  - Auto-assigns the nearest optimal bay or allows manual bay selection.
-  - Generates a **Digital Thermal Ticket Pass** with simulated barcode, timestamp, and printable styling (`Ctrl + P`).
-
-- 💳 **Check-Out & Automated Tariff Billing**:
-  - Look up active vehicles by plate number, ticket ID, or bay ID.
-  - Automated elapsed time tracking (hours & minutes).
-  - Vehicle-specific tiered pricing (First hour base rate, hourly rate, EV charging surcharges, daily caps).
-  - Payment mode selector (Cash, Credit Card, UPI / Fastag, Mobile Pay).
-  - Official printable tax invoice receipt.
-
-- 📊 **Real-Time Analytics & Dashboard**:
-  - Live KPI cards: Total bays, Available bays, Occupancy %, and Today's settled revenue.
-  - Interactive Doughnut chart: Vehicle classification breakdown.
-  - Utilization trend bar chart by hour.
-  - Live gate activity stream of recent arrivals and exits.
-
-- 📁 **Session History & CSV Export**:
-  - Audit trail of all completed parking sessions.
-  - 1-click **Export to CSV** for management reports.
-
-- 📱 **Access from Any Gadget (Phone, Tablet, Laptop)**:
-  - Responsive mobile-first UI with touch-friendly controls.
-  - Built-in **QR Code & Link Sharing**: Click "Connect Gadgets" to scan and open directly on your iPhone, Android phone, or iPad.
-  - Real-time synchronization across all devices connected to the local Wi-Fi network.
-
-- ⚡ **Zero-Dependency Dual Mode Architecture**:
-  - **Option 1 (Standalone)**: Double-click `index.html` to open directly in any browser with instant `localStorage` persistence.
-  - **Option 2 (Full REST + SQLite Backend)**: Run `python server.py` to launch a persistent SQLite-backed server on `http://localhost:8000` with **zero `pip install` required** (uses Python's standard library).
+An interactive, responsive, and production-ready **Agentic Construction Planning Platform** built strictly in accordance with the official **Construct-AI System Architecture**, **Agent Design Specification**, and **Frontend Page Specification**.
 
 ---
 
-## 📱 How to Use on Any Gadget (Phones & Tablets)
+## 🎨 UI & UX Design System & Color Palette
 
-### Step 1: Start the server on your computer
-```powershell
-python server.py
-```
+Construct-AI features an architectural, high-tech AI design system tailored for engineering professionals:
 
-### Step 2: Connect your gadget to the same Wi-Fi
-Make sure your smartphone, iPad, tablet, or secondary laptop is connected to the same Wi-Fi network as your computer.
-
-### Step 3: Open on your gadget
-- **Option A (Instant QR Scan)**: Open `http://localhost:8000` on your PC, click the green **"Connect Gadgets"** button at top-right, and scan the QR code with your phone camera!
-- **Option B (Direct URL)**: Open the browser on your phone (Chrome / Safari) and enter:
-  ```
-  http://10.185.31.221:8000
-  ```
-*(Note: Replace `10.185.31.221` with your computer's IP address if your network changes).*
+| UI Role | Color Name | Hex Code | Visual Application |
+| :--- | :--- | :--- | :--- |
+| **Primary Brand** | Industrial Safety Gold | `#F59E0B` / `#D97706` | Primary action buttons, badges, key figures |
+| **Accent Glow** | Construction Amber | `#FFB020` / `#F97316` | Active agent aura, laser sweep line |
+| **Canvas Background** | Blueprint Slate Navy | `#070A12` | Deep contrast background with subtle CAD grid |
+| **Card Surface** | Frosted Slate Glass | `rgba(15, 23, 42, 0.78)` | Translucent glassmorphism with 1px border |
+| **Stage 1 (Foundation)** | Earth Amber | `#D97706` | Footing, sub-structure, excavation phase |
+| **Stage 2 (Structure)** | Industrial Cyan/Indigo | `#3B82F6` / `#6366F1` | Columns, beams, slabs, brick masonry |
+| **Stage 3 (Finishing)** | Architect Emerald | `#10B981` | Vitrified tiles, emulsion paint, fittings |
+| **Verification Pass** | Emerald Verified | `#10B981` | Passed 5-point engineering checklist |
+| **Sanity Violation** | Crimson Alert | `#EF4444` | Price surge / mix ratio anomaly warning |
 
 ---
 
-## 🌐 How to Share with Anyone Over the Public Internet (Free)
+## 🤖 9 Directed LangGraph Agents
 
-If you want anyone in the world to access your parking management system from anywhere:
+The system orchestrates 9 specialized agents in a directed state machine:
 
-1. **Option 1: Using Cloudflare Tunnel (Zero-cost, no install needed)**
-   ```powershell
-   winget install Cloudflare.cloudflared
-   cloudflared tunnel --url http://localhost:8000
-   ```
-   *This will generate a free public `https://....trycloudflare.com` link you can share with anyone!*
-
-2. **Option 2: Using ngrok**
-   ```powershell
-   ngrok http 8000
-   ```
+1. **🎯 Intent Agent**: Classifies project specifications, determines analysis mode, and passes structured intent.
+2. **👁️ Vision Agent**: Analyzes 2D architectural floor plans / photographs to detect rooms, doors, windows, and calculate spatial area. If confidence drops below `0.60`, it triggers a mandatory manual dimension verification banner.
+3. **📐 Estimation Agent**: Calls deterministic Python calculation functions in `calculations/engine.py` (adhering to **Rule 2.1: LLM Does Not Calculate**).
+4. **📦 Material Agent**: Normalizes raw engineering quantities into a categorized Bill of Materials (BOM) with standardized civil units.
+5. **💰 Cost Agent**: Evaluates pricing in Indian Rupees (₹ INR) sourced directly from the seeded `material_prices` table.
+6. **🚚 Supplier Agent**: Multi-criteria trade-off scoring evaluating price competitiveness, logistics distance (km), and real-time inventory availability.
+7. **📅 Planning Agent**: Generates a 3-phase procurement timeline (Substructure & Foundation, Superstructure & Masonry, Architectural Finishing).
+8. **🚛 Delivery Agent**: Batches heavy building materials into vehicle consignments based on truck tonnage capacities and phase dependency.
+9. **🛡️ Verification Agent & Orchestrator**: Executes a 5-point civil engineering sanity checklist. If a price anomaly or mix ratio violation is detected, it triggers a bounded replanning loop (Attempt 1 of 2) without restarting the entire pipeline.
 
 ---
 
-## 🚀 How to Run
+## 📐 Rule 2.1: Deterministic Civil Calculations (IS 456 / SP 16)
 
-### Method 1: Start with Python SQLite Server (Recommended)
+> *"The LLM never performs engineering calculations or pricing arithmetic directly."*
 
-Open PowerShell in this directory and run:
+- **Concrete Volume**: Empirically estimated per IS 456 coefficients ($0.22\text{ m}^3/\text{m}^2$ for residential, $0.28\text{ m}^3/\text{m}^2$ for commercial).
+- **Cement, Sand & Aggregate**: Standard dry volume conversion factor of `1.54` with M20 mix ratio (`1 : 1.5 : 3`).
+- **Steel Reinforcement**: $82\text{ kg/m}^3$ (residential) to $96\text{ kg/m}^3$ (commercial) Fe550 high-yield rebars.
+- **Brick Masonry**: 500 modular bricks per $\text{m}^3$ of net wall volume with a 15% opening deduction and 5% handling wastage.
+- **Math Proof Inspector**: Every line item in the Material Table has a **"🔍 Math Proof"** button that reveals the full step-by-step mathematical derivation.
+
+---
+
+## ⚡ Zero-Dependency Dual-Mode Architecture
+
+Construct-AI is designed to run under **any** environment with zero friction:
+
+### Option 1: Full REST API + SQLite Backend (Recommended)
+Runs using Python 3's standard library with **zero pip dependencies**:
 
 ```powershell
 python server.py
 ```
+- Open your browser at: **`http://localhost:8000`**
+- API Health Endpoint: `http://localhost:8000/api/health`
+- REST Endpoints for Projects, Analysis, Replan simulation, Suppliers, Procurement, and Logs.
 
-Then open your browser and navigate to:
-👉 **[http://localhost:8000](http://localhost:8000)**
-
-### Method 2: Direct Browser Launch (Offline Mode)
-
-Simply double-click **`index.html`** in File Explorer or open it in Google Chrome, Microsoft Edge, or Mozilla Firefox.
-
----
-
-## 📁 Project Structure
-
-```
-├── index.html         # Main Single Page Application interface
-├── server.py          # Python standard library HTTP & SQLite REST server
-├── css/
-│   └── styles.css     # Custom animations, parking bay styles, thermal receipts
-├── js/
-│   ├── store.js       # Unified data layer (REST API + localStorage fallback)
-│   ├── grid.js        # Interactive visual floor plan & slot bay renderer
-│   ├── billing.js     # Tariff engine, duration counter, receipt formatter
-│   └── app.js         # Master UI controller, search, navigation, charts
-└── README.md          # Documentation and setup guide
-```
+### Option 2: Standalone Local Engine (Zero Setup)
+- Double-click `index.html` to open directly in any web browser (`file:///.../index.html`).
+- The application automatically detects offline mode and runs the full client-side deterministic calculation engine, interactive CAD canvas, multi-agent state visualizer, and supplier re-ranker.
 
 ---
 
-## 🏷️ Default Tariff Rates
+## 🧪 Testing Checklist & Demo Verification
 
-| Vehicle Category | 1st Hour Base Rate | Hourly Rate (after 1st hr) | Daily Maximum Cap | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **Two-Wheeler** | $1.00 | $1.50 / hr | $12.00 | Bikes & Scooters |
-| **Sedan / Car** | $2.50 | $3.00 / hr | $25.00 | Standard vehicle bay |
-| **SUV** | $3.50 | $4.00 / hr | $35.00 | Large vehicle bay |
-| **Electric (EV)** | $3.00 | $3.50 / hr | $30.00 | +$4.00 fast charging hub fee |
-| **Priority** | $2.00 | $2.50 / hr | $20.00 | Accessible permit |
-
----
-
-## 🧪 Testing Tips
-
-1. Go to the **Check-In Gate** tab and click one of the quick test buttons (e.g. `🚗 Sedan (KA-05-NB-7821)`).
-2. Click **"Open Barrier & Issue Ticket Pass"** to see the thermal pass pop up.
-3. Switch to the **Live Bay Map** tab to see the assigned bay turn red.
-4. Click on the occupied bay to instantly load it into the **Check-Out Cashier**.
-5. Select a payment method and click **"Collect Payment & Release Gate"** to see the printable tax receipt and free the bay!
+- [x] **Upload & Presets**: 1-click presets for Luxury Villa (4-BHK), Commercial Space, Duplex Apartment, or Low Confidence photo.
+- [x] **Vision Scanner & Canvas**: Animated laser sweep line, detected room boxes, and layer toggles (Architectural, Structural RCC Grid, Material Heatmap).
+- [x] **Low Confidence Fallback**: When confidence is below 60%, a manual dimension override prompt is displayed.
+- [x] **Deterministic Traceability**: Click **"🔍 Math Proof"** on any material item to view the exact formula and IS 456 coefficients.
+- [x] **Interactive Supplier Weights**: Adjust sliders for Price %, Distance %, and Stock % to watch the supplier cards re-rank in real time.
+- [x] **Replan Loop Simulation**: Click **"⚡ Simulate Verification Failure & Replan"** to observe the Verification Agent catch a steel price surge and trigger a bounded replan loop live.
+- [x] **Real-Time Agent Audit Log**: Live streaming console showing each agent firing in sequence with tool inputs and JSON outputs.
+- [x] **Human-in-the-Loop Gate**: Interactive digital signature canvas pad and official printable Purchase Order voucher (`Ctrl + P`).
+- [x] **Engineering Disclaimer**: Prominent safety notice displayed on all cost and material pages.

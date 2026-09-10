@@ -1,0 +1,360 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	Agent	Design
+Specification
+This	document	defines	the	contract	(input,	output,	tools,	failure	mode)	for	every	agent
+in	the	pipeline,	plus	the	orchestration	and	replanning	logic	that	ties	them	together.
+1.	Orchestrator	Agent
+File:
+	
+agents/orchestrator.py
+Coordinates	all	other	agents	as	a	LangGraph	state	machine.	It	does	not	perform
+domain	reasoning	itself	—	it	decides	
+which	agent	runs	next
+	based	on	the	current	state
+and	whether	the	prior	step	succeeded.
+User	Request	→	Orchestrator	→	Determine	next	agent	→	Invoke	→	Collect
+	
+result
+			→	Check	dependencies	satisf ied?	→	Continue	or	Replan
+State	object	(simplified):
+Replanning	is	scoped	to	the	failing	stage	plus	any	downstream	stage	that	depends	on
+it	—	never	a	full	pipeline	restart.	A	maximum	retry	count	(default	2)	prevents	infinite
+loops;	on	exhaustion,	the	run	is	marked	
+f ailed
+	and	surfaced	to	the	user	with	the
+specific	verification	error.
+2.	Intent	Agent
+Input:
+	raw	user	request	/	project	metadata	
+Output:
+	structured	task	type,
+e.g.	
+{"task":	"f ull_estimation",	"requires_vision":	true}
+	
+Notes:
+	thin
+classification	step;	keeps	downstream	agents	from	needing	to	parse	free	text.
+3.	Vision	Agent
+File:
+	
+agents/vision_agent.py
+	
+Input:
+	uploaded	image	(and	floor	plan	if	provided)
+Pipeline:
+	image	preprocessing	→	object/structure	detection	(YOLO/OpenCV	or	vision
+LLM)	→	structured	extraction
+{
+		
+"project_id"
+:
+	
+5
+,
+		
+"stage"
+:
+	
+"cost_agent"
+,
+		
+"history"
+:
+	
+[
+"intent"
+,
+	
+"vision"
+,
+	
+"estimation"
+,
+	
+"material"
+]
+,
+		
+"outputs"
+:
+	
+{
+	
+"vision"
+:
+	
+{
+...
+},
+	
+"estimation"
+:
+	
+{
+...
+}
+	
+},
+		
+"retries"
+:
+	
+{
+	
+"cost_agent"
+:
+	
+1
+	
+}
+}
+
+=== PAGE 2 ===
+Output:
+Important	constraint:
+	a	single	photograph	cannot	reliably	yield	exact	floor	area.
+Confidence	scores	must	be	surfaced	to	the	user,	and	the	UI	should	prompt	for	a	floor
+plan	or	manual	dimension	entry	whenever	confidence	is	low	(e.g.	<	0.6)	rather	than
+silently	proceeding.
+4.	Estimation	Agent
+File:
+	
+agents/estimation_agent.py
+	
+Input:
+	building	attributes	from	Vision	Agent	(or
+manual	input)	
+Output:
+	raw	material	quantities,	computed	via	
+calculations/
+	—
+never	by	the	LLM.
+Floor	area	→	Concrete	volume	→	Cement	/	Sand	/	Aggregate	/	Steel
+The	agent’s	job	is	to	select	which	calculation	functions	apply	(e.g.	does	this	building
+need	a	raft	foundation	formula	or	a	strip	footing	formula)	and	pass	the	right
+parameters	—	the	arithmetic	itself	lives	in	
+calculations/concrete.py
+,	
+calculations/steel.py
+,	etc.
+5.	Material	Agent
+File:
+	
+agents/material_agent.py
+	
+Input:
+	raw	quantities	from	Estimation	Agent
+Output:
+	normalized,	unit-labeled	material	list.
+6.	Cost	Agent
+File:
+	
+agents/cost_agent.py
+	
+Input:
+	material	list	
+Output:
+	costed	material	list,	price
+sourced	from	the	
+material_prices
+	table	or	a	supplier	API	—	
+never	invented	by	the
+LLM
+.
+250	cement	bags	×	₹400/bag	=	₹100,000
+7.	Supplier	Agent
+File:
+	
+agents/supplier_agent.py
+	
+Input:
+	costed	materials	+	project	location	
+Output:
+ranked	supplier	list,	weighing	price,	distance,	and	stock	availability	jointly	rather	than
+{
+		
+"building_type"
+:
+	
+"residential"
+,
+		
+"rooms"
+:
+	
+5
+,
+		
+"doors"
+:
+	
+4
+,
+		
+"windows"
+:
+	
+6
+,
+		
+"f loor_area"
+:
+	
+1500
+,
+		
+"conf idence"
+:
+	
+0.87
+}
+{
+		
+"cement"
+:
+	
+{
+	
+"quantity"
+:
+	
+250
+,
+	
+"unit"
+:
+	
+"bags"
+	
+},
+		
+"sand"
+:
+	
+{
+	
+"quantity"
+:
+	
+32
+,
+	
+"unit"
+:
+	
+"m3"
+	
+}
+}
+
+=== PAGE 3 ===
+sorting	on	price	alone.
+Supplier
+Price
+Distance
+Stock
+A
+₹390
+5	km
+✓
+B
+₹380
+18	km
+✓
+C
+₹400
+3	km
+Low
+The	agent	may	recommend	Supplier	A	over	the	cheaper	Supplier	B	once	delivery
+cost/time	is	factored	in	—	this	trade-off	logic	should	be	an	explicit,	inspectable	scoring
+function,	not	a	black-box	LLM	judgment	call,	so	it	can	be	tuned	and	explained.
+8.	Planning	Agent
+File:
+	
+agents/planning_agent.py
+	
+Input:
+	material	+	cost	+	supplier	outputs	
+Output:
+phased	procurement	plan.
+Stage	1	–	Foundation:		Cement,	Sand,	Aggregate,	Steel
+Stage	2	–	Structure:			Cement,	Bricks,	Steel
+Stage	3	–	Finishing:			Paint,	Tiles,	Electrical,	Plumbing
+9.	Delivery	Agent
+File:
+	
+agents/delivery_agent.py
+	
+Input:
+	supplier	assignments,	construction	stage,
+location,	vehicle	constraints	
+Output:
+	batched	delivery	schedule	(e.g.	combine
+Cement	+	Sand	into	one	delivery,	Bricks	+	Steel	into	another).
+10.	Verification	Agent
+File:
+	
+agents/verif ication_agent.py
+This	is	the	agent	that	justifies	calling	the	system	“agentic”	rather	than	a	single
+prompt-response	call.	It	checks,	in	order:
+1.	
+Are	quantities	within	plausible	engineering	bounds?
+2.	
+Are	calculations	internally	consistent	(e.g.	cement-to-sand	ratio	matches	the	mix
+design	used)?
+3.	
+Are	all	required	materials	available	from	at	least	one	supplier?
+4.	
+Are	supplier	prices	within	an	expected	range	(catch	stale/bad	data)?
+5.	
+Does	the	delivery	plan	respect	stage	ordering	(e.g.	finishing	materials	not
+delivered	before	structure)?
+On	failure,	it	returns	a	structured	list	of	violations,	which	the	Orchestrator	uses	to
+target	a	narrow	replan:
+11.	Guiding	Rule	for	All	Agents
+{
+	
+"status"
+:
+	
+"f ailed"
+,
+	
+"violations"
+:
+	
+[
+		
+{
+	
+"stage"
+:
+	
+"cost_agent"
+,
+	
+"reason"
+:
+	
+"steel	price	3x	historical	average"
+	
+}
+]
+}
+
+=== PAGE 4 ===
+LLM		→		Reasoning	/	Planning		→		Tool	Call		→		Python	Calculation	Engine
+		
+→		Verif ied	Result
+No	agent	should	return	a	number	that	didn’t	come	from	a	tool	call	into	
+calculations/
+,	the	database,	or	a	supplier	API.	The	LLM’s	role	throughout	is
+orchestration,	classification,	and	natural-language	explanation	—	not	arithmetic.
+12.	Observability
+Every	agent	invocation	writes	a	row	to	
+agent_logs
+	(project_id,	agent_name,	action,
+input_data,	output_data,	status,	timestamp).	This	powers	both	the	Agent	Execution
+Log	UI	and	post-hoc	debugging	of	replans.
+

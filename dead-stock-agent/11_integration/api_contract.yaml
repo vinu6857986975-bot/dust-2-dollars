@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: AnyPortal Business Dead-Stock Decision Agent API
+  version: 2.0.0
+paths:
+  /api/health:
+    get:
+      summary: Health check
+  /api/products:
+    get:
+      summary: List all products
+  /api/decision/analyze:
+    post:
+      summary: Execute 4-agent decision pipeline
+  /api/decision/{id}/approve:
+    post:
+      summary: Approve decision
+  /api/decision/{id}/reject:
+    post:
+      summary: Reject decision

@@ -1,0 +1,230 @@
+=== PAGE 1 ===
+Construct-AI	Documentation
+Construct-AI	—	Frontend	Page
+Specification
+Stack:	
+React	+	Vite	+	Tailwind	CSS
+.	This	document	specifies	each	page’s	purpose,
+key	components,	and	states.
+1.	Home	(
+pages/Home.jsx
+)
+Landing	page.	Value	proposition	+	call	to	action.
+Hero:	“CONSTRUCT-AI	—	AI-Powered	Construction	Planning”
+Primary	CTA	button:	
+Start	New	Project
+Components	used:	
+Navbar
+2.	Login	/	Register	(
+pages/Login.jsx
+,	
+pages/Register.jsx
+)
+Standard	auth	forms	wired	to	
+services/authService.js
+,	storing	the	JWT	via	
+AuthContext
+.
+3.	Dashboard	(
+pages/Dashboard.jsx
+)
+Lists	the	user’s	projects	as	cards.
+My	Projects
+─────────────────────
+Project	1	—	1500	sq	f t	—	Analysis	Complete
+Project	2	—	1200	sq	f t	—	In	Progress
+Components:	
+Sidebar
+,	
+LoadingSpinner
+,	
+ErrorMessage
+Each	card	links	to	
+ProjectDetails
+4.	New	Project	(
+pages/NewProject.jsx
+)
+Form	to	create	a	project	and	kick	off	analysis.
+Fields:
+	Project	Name,	Building	Type,	Plot	Area,	Built-up	Area,	Location	
+Uploads:
+Construction	Image,	Floor	Plan	(optional)	
+Action:
+	“Start	AI	Analysis”	→	
+POST
+	
+/api/projects
+	then	
+POST	/api/analysis/upload
+	+	
+POST	/api/analysis/run
+Components:	
+UploadBox
+,	
+ImagePreview
+5.	Analysis	(
+pages/Analysis.jsx
+)
+
+=== PAGE 2 ===
+The	core	demo	screen	—	shows	the	agent	pipeline	running	live.
+┌─────────────────────────────────────┐
+│	AI	CONSTRUCTION	ANALYSIS													│
+├─────────────────────────────────────┤
+│	✓	Intent	Agent																							│
+│	✓	Vision	Agent																							│
+│	✓	Estimation	Agent																			│
+│	✓	Material	Agent																					│
+│	
+⟳
+	Cost	Agent																									│
+│	○	Supplier	Agent																					│
+│	○	Verif ication	Agent																	│
+└─────────────────────────────────────┘
+Components:	
+AgentStatus
+,	
+AgentActivity
+,	
+AnalysisProgress
+Polls	
+GET	/api/analysis/{project_id}
+	(or	subscribes	via	SSE/websocket	post-
+MVP)	to	update	agent	status	in	near	real	time.
+On	completion,	routes	to	
+Materials
+.
+6.	Materials	(
+pages/Materials.jsx
+)
+┌────────────┬───────────┬───────────┬────────┐
+│	Material			│	Quantity		│	Unit						│	Cost			│
+├────────────┼───────────┼───────────┼────────┤
+│	Cement					│	250							│	Bags						│	₹...			│
+│	Sand							│	32								│	m³								│	₹...			│
+│	Aggregate		│	24								│	m³								│	₹...			│
+│	Bricks					│	18,000				│	Nos							│	₹...			│
+│	Steel						│	3.5							│	Tonnes				│	₹...			│
+└────────────┴───────────┴───────────┴────────┘
+Components:	
+MaterialTable
+,	
+MaterialCard
+,	
+CostSummary
+Required	disclaimer,	always	visible	on	this	page:
+	“These	are	preliminary
+estimates	and	should	be	reviewed	by	a	qualified	engineer	before	construction	or
+procurement.”
+7.	Suppliers	(
+pages/Su ppliers.jsx
+)
+Supplier							Price				Distance			Stock
+ABC	Materials		₹380					5	km							✓
+XYZ	Builders			₹395					3	km							✓
+PQR	Traders				₹370					15	km						✓
+AI	Recommendation:	Supplier	ABC	—	best	overall	balance	of
+price,	distance	and	stock.
+Components:	
+SupplierCard
+,	
+SupplierTable
+,	
+RecommendationCard
+8.	Procurement	(
+pages/Procu rement.jsx
+)
+Phase	1	━━━━━━━━━━━━		Cement	✓		Sand	✓		Aggregate	✓
+Phase	2	━━━━━━━━━━━━		Bricks	○		Steel	○
+Phase	3	━━━━━━━━━━━━		Paint	○		Tiles	○
+
+=== PAGE 3 ===
+Components:	
+ConstructionPlan
+,	
+ApprovalDialog
+The	
+ApprovalDialog
+	is	the	human-in-the-loop	gate	—	no	procurement	order	is
+marked	active	without	it.
+9.	Profile	(
+pages/Profile.jsx
+)
+Basic	account	settings,	password	change,	and	(optionally)	an	agent-execution-log
+viewer	for	power	users.
+10.	Shared	Components	Reference
+Component
+Used	on
+Purpose
+Navbar
+all
+top	nav,	auth	state
+Sidebar
+Dashboard
+project	navigation
+UploadBox
+NewProject
+drag/drop	image	upload
+ImagePreview
+NewProject
+thumbnail	preview	before
+submit
+AnalysisProgress
+Analysis
+overall	progress	bar
+AgentStatus
+	/	
+AgentActivity
+Analysis
+per-agent	live	status	list
+MaterialCard
+	/	
+MaterialTable
+Materials
+material	line	items
+CostSummary
+Materials
+total	cost	rollup
+SupplierCard
+	/	
+SupplierTable
+Suppliers
+supplier	comparison
+RecommendationCard
+Suppliers
+AI-ranked	recommendation
+with	rationale
+ConstructionPlan
+Procurement
+phased	plan	display
+ApprovalDialog
+Procurement
+explicit	user	sign-off	modal
+LoadingSpinner
+	/	
+ErrorMessage
+all
+shared	UX	states
+11.	State	Management
+context/AuthContext.jsx
+	—	current	user	+	JWT
+context/ProjectContext.jsx
+	—	active	project	+	cached	analysis	result
+hooks/useAuth.js
+,	
+useProject.js
+,	
+useAnalysis.js
+	—	thin	wrappers	around	the
+above	contexts	and	
+services/*.js
+	API	calls
+12.	Agent	Execution	Log	(optional	but	recommended)
+A	scrolling,	timestamped	log	view	—	pulls	from	
+GET	/api/agents/logs/{project_id}
+—	showing	each	agent	firing	in	sequence.	This	is	the	single	most	persuasive	UI
+element	for	demonstrating	that	the	system	is	genuinely	agentic	rather	than	a	single
+
+=== PAGE 4 ===
+prompt/response	call.
+

@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecisionOutput",
+  "type": "object",
+  "required": [
+    "recommended_action",
+    "confidence",
+    "reasoning",
+    "candidate_actions"
+  ],
+  "properties": {
+    "recommended_action": {
+      "type": "string"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "reasoning": {
+      "type": "string"
+    },
+    "expected_capital_recovery": {
+      "type": "number"
+    },
+    "candidate_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number"
+          },
+          "feasible": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

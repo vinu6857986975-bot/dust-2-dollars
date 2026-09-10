@@ -1,0 +1,72 @@
+{
+  "nodes": [
+    {
+      "id": "PROD_JACKET",
+      "label": "Winter Jacket",
+      "type": "Product",
+      "cost": 1500,
+      "price": 2499,
+      "age_days": 145
+    },
+    {
+      "id": "CAT_APPAREL",
+      "label": "Apparel & Outerwear",
+      "type": "Category",
+      "elasticity": "high"
+    },
+    {
+      "id": "SUP_NORDIC",
+      "label": "Nordic Weavers Ltd",
+      "type": "Supplier",
+      "return_window_days": 30,
+      "return_allowed": true
+    },
+    {
+      "id": "POL_RETURN",
+      "label": "Supplier Return SLA",
+      "type": "Policy",
+      "max_age": 30
+    },
+    {
+      "id": "ACT_DISCOUNT",
+      "label": "20% Discount + Bundle",
+      "type": "Action",
+      "status": "Feasible",
+      "score": 88
+    },
+    {
+      "id": "ACT_RETURN",
+      "label": "Return to Supplier",
+      "type": "Action",
+      "status": "Infeasible",
+      "reason": "Window Expired"
+    }
+  ],
+  "edges": [
+    {
+      "from": "PROD_JACKET",
+      "to": "CAT_APPAREL",
+      "relation": "belongs_to"
+    },
+    {
+      "from": "PROD_JACKET",
+      "to": "SUP_NORDIC",
+      "relation": "supplied_by"
+    },
+    {
+      "from": "SUP_NORDIC",
+      "to": "POL_RETURN",
+      "relation": "governed_by"
+    },
+    {
+      "from": "PROD_JACKET",
+      "to": "ACT_DISCOUNT",
+      "relation": "qualifies_for"
+    },
+    {
+      "from": "PROD_JACKET",
+      "to": "ACT_RETURN",
+      "relation": "blocked_by"
+    }
+  ]
+}

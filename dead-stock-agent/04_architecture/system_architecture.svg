@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#0A0D14"/>
+  <text x="400" y="35" fill="#38BDF8" font-size="20" font-weight="bold" font-family="system-ui" text-anchor="middle">AnyPortal System Architecture</text>
+  
+  <!-- Client Tier -->
+  <rect x="50" y="70" width="700" height="70" rx="10" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+  <text x="70" y="95" fill="#38BDF8" font-size="12" font-weight="bold">PRESENTATION LAYER (10_FRONTEND)</text>
+  <text x="70" y="120" fill="#94A3B8" font-size="12">Interactive Cyber UI • Canvas Particle Visualizer • What-If Sandbox • Red Team Lab • Decision Studio</text>
+  
+  <!-- Backend API -->
+  <rect x="50" y="170" width="700" height="70" rx="10" fill="#1E293B" stroke="#6366F1" stroke-width="2"/>
+  <text x="70" y="195" fill="#818CF8" font-size="12" font-weight="bold">APPLICATION &amp; ORCHESTRATION LAYER (06_BACKEND)</text>
+  <text x="70" y="220" fill="#94A3B8" font-size="12">FastAPI / Python Stdlib REST Server • Agent Pipeline Orchestrator • SQLite WAL Database Service</text>
+  
+  <!-- Intelligence & Data -->
+  <rect x="50" y="270" width="340" height="180" rx="10" fill="#1E293B" stroke="#10B981" stroke-width="2"/>
+  <text x="70" y="295" fill="#34D399" font-size="12" font-weight="bold">COGNITIVE AI &amp; NLP LAYER</text>
+  <text x="70" y="325" fill="#E2E8F0" font-size="11">• Stock Aging Analyzer (07_AI_NLP)</text>
+  <text x="70" y="350" fill="#E2E8F0" font-size="11">• Category Elasticity Agent</text>
+  <text x="70" y="375" fill="#E2E8F0" font-size="11">• Deterministic Scoring Engine</text>
+  <text x="70" y="400" fill="#E2E8F0" font-size="11">• OpenAI GPT-4o-mini Context Rationale</text>
+  <text x="70" y="425" fill="#E2E8F0" font-size="11">• Built-in Offline Fallback Generator</text>
+  
+  <rect x="410" y="270" width="340" height="180" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="2"/>
+  <text x="430" y="295" fill="#FCD34D" font-size="12" font-weight="bold">POLICY GRAPH &amp; GOVERNANCE LAYER</text>
+  <text x="430" y="325" fill="#E2E8F0" font-size="11">• Knowledge Graph (08_KNOWLEDGE_GRAPH)</text>
+  <text x="430" y="350" fill="#E2E8F0" font-size="11">• Hard Constraint Filter (Supplier SLA)</text>
+  <text x="430" y="375" fill="#E2E8F0" font-size="11">• Red Team Injection Shield (14_RED_TEAM)</text>
+  <text x="430" y="400" fill="#E2E8F0" font-size="11">• Immutable SQLite Audit Log (05_DATABASE)</text>
+  <text x="430" y="425" fill="#E2E8F0" font-size="11">• Human-in-the-Loop Approval Gateway</text>
+</svg>

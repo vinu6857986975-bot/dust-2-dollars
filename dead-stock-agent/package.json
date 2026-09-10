@@ -1,0 +1,17 @@
+{
+  "name": "anyportal-dead-stock-agent",
+  "version": "2.4.0",
+  "description": "AnyPortal Business Dead-Stock Decision Agent - Autonomous Multi-Agent AI Platform",
+  "scripts": {
+    "start": "python server.py",
+    "test": "python -m unittest discover -s 13_testing/unit"
+  },
+  "keywords": [
+    "agentic-ai",
+    "dead-stock",
+    "inventory-management",
+    "retail-tech"
+  ],
+  "author": "AnyPortal AI Team",
+  "license": "MIT"
+}

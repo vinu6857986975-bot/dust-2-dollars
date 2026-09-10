@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 650" width="100%" height="100%">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#080B10"/>
+  <text x="400" y="40" fill="#F8FAFC" font-size="20" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">AnyPortal System Flowchart</text>
+  
+  <g transform="translate(300, 70)">
+    <rect width="200" height="45" rx="8" fill="url(#g1)"/>
+    <text x="100" y="28" fill="#fff" font-size="14" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">START: Inventory Input</text>
+  </g>
+  
+  <path d="M400,115 L400,150" stroke="#6366F1" stroke-width="3" stroke-dasharray="4"/>
+  
+  <g transform="translate(300, 150)">
+    <rect width="200" height="50" rx="8" fill="url(#cardGrad)" stroke="#334155" stroke-width="2"/>
+    <text x="100" y="30" fill="#E2E8F0" font-size="13" font-family="system-ui, sans-serif" text-anchor="middle">Data Validation Check</text>
+  </g>
+  
+  <path d="M400,200 L400,240" stroke="#6366F1" stroke-width="3"/>
+  
+  <rect x="100" y="240" width="600" height="110" rx="12" fill="#0B1120" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="6"/>
+  <text x="120" y="260" fill="#818CF8" font-size="11" font-weight="bold" font-family="system-ui, sans-serif">MULTI-AGENT ANALYSIS STAGE</text>
+  
+  <g transform="translate(130, 275)">
+    <rect width="150" height="55" rx="6" fill="#1E293B" stroke="#EF4444" stroke-width="1.5"/>
+    <text x="75" y="25" fill="#F87171" font-size="12" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Stock Agent</text>
+    <text x="75" y="42" fill="#94A3B8" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle">Aging &amp; Velocity</text>
+  </g>
+  
+  <g transform="translate(325, 275)">
+    <rect width="150" height="55" rx="6" fill="#1E293B" stroke="#F59E0B" stroke-width="1.5"/>
+    <text x="75" y="25" fill="#FCD34D" font-size="12" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Product Agent</text>
+    <text x="75" y="42" fill="#94A3B8" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle">Category &amp; Elasticity</text>
+  </g>
+  
+  <g transform="translate(520, 275)">
+    <rect width="150" height="55" rx="6" fill="#1E293B" stroke="#6366F1" stroke-width="1.5"/>
+    <text x="75" y="25" fill="#A5B4FC" font-size="12" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Strategy Agent</text>
+    <text x="75" y="42" fill="#94A3B8" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle">Generate 8 Actions</text>
+  </g>
+  
+  <path d="M400,350 L400,385" stroke="#6366F1" stroke-width="3"/>
+  
+  <g transform="translate(280, 385)">
+    <rect width="240" height="50" rx="8" fill="url(#cardGrad)" stroke="#10B981" stroke-width="2"/>
+    <text x="120" y="25" fill="#34D399" font-size="13" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Knowledge &amp; Policy Gate</text>
+    <text x="120" y="40" fill="#94A3B8" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle">Hard Constraint Elimination</text>
+  </g>
+  
+  <path d="M400,435 L400,470" stroke="#6366F1" stroke-width="3"/>
+  
+  <g transform="translate(280, 470)">
+    <rect width="240" height="50" rx="8" fill="url(#cardGrad)" stroke="#06B6D4" stroke-width="2"/>
+    <text x="120" y="25" fill="#38BDF8" font-size="13" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Decision Engine (MCDA)</text>
+    <text x="120" y="40" fill="#94A3B8" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle">Composite Scoring &amp; LLM Context</text>
+  </g>
+  
+  <path d="M400,520 L400,555" stroke="#6366F1" stroke-width="3"/>
+  
+  <g transform="translate(300, 555)">
+    <rect width="200" height="50" rx="8" fill="url(#g1)"/>
+    <text x="100" y="25" fill="#fff" font-size="13" font-weight="bold" font-family="system-ui, sans-serif" text-anchor="middle">Human Approval / Audit</text>
+    <text x="100" y="42" fill="#E0E7FF" font-size="11" font-family="system-ui, sans-serif" text-anchor="middle">Approved &rarr; DB Logged</text>
+  </g>
+</svg>

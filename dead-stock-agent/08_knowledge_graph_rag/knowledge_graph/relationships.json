@@ -1,0 +1,56 @@
+[
+  {
+    "source": "PROD-001",
+    "relation": "BELONGS_TO",
+    "target": "CAT-APPAREL",
+    "properties": { "seasonal": true, "sub_category": "Winterwear" }
+  },
+  {
+    "source": "PROD-001",
+    "relation": "SUPPLIED_BY",
+    "target": "SUP-001",
+    "properties": { "lead_time_days": 14, "contract_active": true }
+  },
+  {
+    "source": "SUP-001",
+    "relation": "HAS_POLICY",
+    "target": "POL-SUP-001",
+    "properties": { "return_window_days": 30, "restocking_fee": 0.10 }
+  },
+  {
+    "source": "PROD-002",
+    "relation": "BELONGS_TO",
+    "target": "CAT-FOOTWEAR",
+    "properties": { "seasonal": false, "sub_category": "Athletic" }
+  },
+  {
+    "source": "PROD-002",
+    "relation": "SUPPLIED_BY",
+    "target": "SUP-002",
+    "properties": { "lead_time_days": 7, "contract_active": true }
+  },
+  {
+    "source": "SUP-002",
+    "relation": "HAS_POLICY",
+    "target": "POL-SUP-002",
+    "properties": { "return_window_days": 90, "restocking_fee": 0.05 }
+  },
+  {
+    "source": "PROD-003",
+    "relation": "BELONGS_TO",
+    "target": "CAT-ELECTRONICS",
+    "properties": { "perishable": false, "rapid_depreciation": true }
+  },
+  {
+    "source": "PROD-003",
+    "relation": "SUPPLIED_BY",
+    "target": "SUP-003",
+    "properties": { "lead_time_days": 21, "contract_active": true }
+  },
+  {
+    "source": "SUP-003",
+    "relation": "HAS_POLICY",
+    "target": "POL-SUP-003",
+    "properties": { "return_window_days": 15, "restocking_fee": 0.20 }
+  }
+]

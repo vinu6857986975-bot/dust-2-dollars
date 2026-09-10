@@ -1,0 +1,6 @@
+# AnyPortal Business Dead-Stock Decision Agent
+# Standard library execution requires zero pip installs!
+# Optional packages for development, FastAPI, or extended tests:
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+# requests>=2.31.0

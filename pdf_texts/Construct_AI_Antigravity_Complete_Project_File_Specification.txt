@@ -1,0 +1,502 @@
+=== PAGE 1 ===
+CONSTRUCT-AI
+Complete Frontend + Backend + Agentic AI File Specification for Antigravity
+Purpose: Use this document as the master specification when generating the project in Antigravity. It defines the folder
+structure, file names, responsibilities, APIs, database entities, agents, tools, workflow, environment variables, and
+implementation order.
+Important MVP boundary
+The system must not claim that one ordinary house photograph can accurately determine engineering quantities. The
+MVP should accept a construction image/floor plan plus user-supplied dimensions. Computer vision identifies visible
+structural elements; deterministic Python calculation tools perform quantity estimation; supplier prices come from the
+database; the verification agent checks outputs; human approval is required before procurement actions.
+
+
+=== PAGE 2 ===
+1. System Architecture
+ USER
+  |
+  v
+REACT FRONTEND
+  |
+  v
+FASTAPI BACKEND
+  |
+  v
+ORCHESTRATOR AGENT
+  |
+  +--> Intent Agent
+  +--> Vision Agent --> Vision Model / OpenCV
+  +--> Estimation Agent --> Quantity Calculation Tools
+  +--> Material Agent
+  +--> Cost Agent --> Price Database
+  +--> Supplier Agent --> Supplier + Inventory Database
+  +--> Planning Agent
+  +--> Delivery Agent
+  +--> Verification Agent
+  |
+  +--> Memory / Agent Logs
+  +--> RAG Knowledge Base
+  |
+  v
+HUMAN APPROVAL
+  |
+  v
+PROCUREMENT PLAN
+Agentic loop: Goal → Plan → Execute → Observe → Verify → Replan or Complete. The LLM should orchestrate and
+reason; deterministic tools should perform calculations, database queries and validation.
+2. Complete Project File Tree
+ construct-ai/
+■■■ frontend/
+■   ■■■ public/
+■   ■   ■■■ logo.png
+■   ■   ■■■ favicon.ico
+■   ■■■ src/
+■   ■   ■■■ assets/
+■   ■   ■   ■■■ logo.svg
+■   ■   ■   ■■■ construction-bg.jpg
+■   ■   ■■■ components/
+■   ■   ■   ■■■ Navbar.jsx
+■   ■   ■   ■■■ Sidebar.jsx
+■   ■   ■   ■■■ UploadBox.jsx
+■   ■   ■   ■■■ ImagePreview.jsx
+■   ■   ■   ■■■ AnalysisProgress.jsx
+■   ■   ■   ■■■ AgentStatus.jsx
+■   ■   ■   ■■■ AgentActivity.jsx
+■   ■   ■   ■■■ MaterialCard.jsx
+■   ■   ■   ■■■ MaterialTable.jsx
+■   ■   ■   ■■■ CostSummary.jsx
+■   ■   ■   ■■■ SupplierCard.jsx
+■   ■   ■   ■■■ SupplierTable.jsx
+■   ■   ■   ■■■ RecommendationCard.jsx
+■   ■   ■   ■■■ ConstructionPlan.jsx
+■   ■   ■   ■■■ ApprovalDialog.jsx
+■   ■   ■   ■■■ LoadingSpinner.jsx
+■   ■   ■   ■■■ ErrorMessage.jsx
+■   ■   ■■■ pages/
+■   ■   ■   ■■■ Home.jsx
+■   ■   ■   ■■■ Login.jsx
+■   ■   ■   ■■■ Register.jsx
+■   ■   ■   ■■■ Dashboard.jsx
+■   ■   ■   ■■■ NewProject.jsx
+■   ■   ■   ■■■ ProjectDetails.jsx
+■   ■   ■   ■■■ Analysis.jsx
+■   ■   ■   ■■■ Materials.jsx
+■   ■   ■   ■■■ Suppliers.jsx
+■   ■   ■   ■■■ Procurement.jsx
+■   ■   ■   ■■■ Profile.jsx
+■   ■   ■■■ services/
+■   ■   ■   ■■■ api.js
+■   ■   ■   ■■■ authService.js
+
+
+=== PAGE 3 ===
+■   ■   ■   ■■■ projectService.js
+■   ■   ■   ■■■ analysisService.js
+■   ■   ■   ■■■ materialService.js
+■   ■   ■   ■■■ supplierService.js
+■   ■   ■■■ context/
+■   ■   ■   ■■■ AuthContext.jsx
+■   ■   ■   ■■■ ProjectContext.jsx
+■   ■   ■■■ hooks/
+■   ■   ■   ■■■ useAuth.js
+■   ■   ■   ■■■ useProject.js
+■   ■   ■   ■■■ useAnalysis.js
+■   ■   ■■■ utils/
+■   ■   ■   ■■■ calculations.js
+■   ■   ■   ■■■ formatCurrency.js
+■   ■   ■   ■■■ validation.js
+■   ■   ■■■ App.jsx
+■   ■   ■■■ main.jsx
+■   ■   ■■■ index.css
+■   ■■■ package.json
+■   ■■■ vite.config.js
+■   ■■■ tailwind.config.js
+■   ■■■ postcss.config.js
+■   ■■■ .env
+■■■ backend/
+■   ■■■ app/
+■   ■   ■■■ main.py
+■   ■   ■■■ config.py
+■   ■   ■■■ database.py
+■   ■   ■■■ dependencies.py
+■   ■   ■■■ api/
+■   ■   ■   ■■■ auth.py
+■   ■   ■   ■■■ projects.py
+■   ■   ■   ■■■ analysis.py
+■   ■   ■   ■■■ materials.py
+■   ■   ■   ■■■ suppliers.py
+■   ■   ■   ■■■ procurement.py
+■   ■   ■   ■■■ agents.py
+■   ■   ■■■ agents/
+■   ■   ■   ■■■ orchestrator.py
+■   ■   ■   ■■■ intent_agent.py
+■   ■   ■   ■■■ vision_agent.py
+■   ■   ■   ■■■ estimation_agent.py
+■   ■   ■   ■■■ material_agent.py
+■   ■   ■   ■■■ cost_agent.py
+■   ■   ■   ■■■ supplier_agent.py
+■   ■   ■   ■■■ planning_agent.py
+■   ■   ■   ■■■ delivery_agent.py
+■   ■   ■   ■■■ procurement_agent.py
+■   ■   ■   ■■■ verification_agent.py
+■   ■   ■■■ workflows/
+■   ■   ■   ■■■ construction_workflow.py
+■   ■   ■   ■■■ estimation_workflow.py
+■   ■   ■   ■■■ procurement_workflow.py
+■   ■   ■■■ models/
+■   ■   ■   ■■■ user.py
+■   ■   ■   ■■■ project.py
+■   ■   ■   ■■■ building.py
+■   ■   ■   ■■■ material.py
+■   ■   ■   ■■■ supplier.py
+■   ■   ■   ■■■ quotation.py
+■   ■   ■   ■■■ procurement.py
+■   ■   ■   ■■■ agent_log.py
+■   ■   ■■■ schemas/
+■   ■   ■   ■■■ auth.py
+■   ■   ■   ■■■ project.py
+■   ■   ■   ■■■ analysis.py
+■   ■   ■   ■■■ material.py
+■   ■   ■   ■■■ supplier.py
+■   ■   ■   ■■■ procurement.py
+■   ■   ■■■ services/
+■   ■   ■   ■■■ auth_service.py
+■   ■   ■   ■■■ project_service.py
+■   ■   ■   ■■■ image_service.py
+■   ■   ■   ■■■ material_service.py
+■   ■   ■   ■■■ supplier_service.py
+■   ■   ■   ■■■ quotation_service.py
+■   ■   ■■■ tools/
+■   ■   ■   ■■■ image_analysis_tool.py
+■   ■   ■   ■■■ quantity_calculator.py
+■   ■   ■   ■■■ cost_calculator.py
+■   ■   ■   ■■■ supplier_search.py
+■   ■   ■   ■■■ inventory_checker.py
+
+
+=== PAGE 4 ===
+■   ■   ■   ■■■ distance_calculator.py
+■   ■   ■   ■■■ delivery_planner.py
+■   ■   ■■■ vision/
+■   ■   ■   ■■■ detector.py
+■   ■   ■   ■■■ image_processor.py
+■   ■   ■   ■■■ models/
+■   ■   ■■■ calculations/
+■   ■   ■   ■■■ concrete.py
+■   ■   ■   ■■■ cement.py
+■   ■   ■   ■■■ sand.py
+■   ■   ■   ■■■ aggregate.py
+■   ■   ■   ■■■ bricks.py
+■   ■   ■   ■■■ steel.py
+■   ■   ■   ■■■ paint.py
+■   ■   ■■■ rag/
+■   ■   ■   ■■■ documents/
+■   ■   ■   ■■■ embeddings.py
+■   ■   ■   ■■■ vector_store.py
+■   ■   ■   ■■■ retriever.py
+■   ■   ■■■ security/
+■   ■   ■   ■■■ jwt.py
+■   ■   ■   ■■■ password.py
+■   ■   ■■■ utils/
+■   ■       ■■■ logger.py
+■   ■       ■■■ helpers.py
+■   ■■■ tests/
+■   ■   ■■■ test_auth.py
+■   ■   ■■■ test_vision.py
+■   ■   ■■■ test_estimation.py
+■   ■   ■■■ test_materials.py
+■   ■   ■■■ test_agents.py
+■   ■■■ uploads/
+■   ■■■ requirements.txt
+■   ■■■ .env
+■■■ database/
+■   ■■■ schema.sql
+■   ■■■ seed.sql
+■   ■■■ migrations/
+■■■ ai_models/
+■   ■■■ vision/
+■   ■■■ embeddings/
+■   ■■■ README.md
+■■■ docs/
+■   ■■■ architecture.md
+■   ■■■ api.md
+■   ■■■ agents.md
+■   ■■■ database.md
+■■■ docker/
+■   ■■■ frontend.Dockerfile
+■   ■■■ backend.Dockerfile
+■■■ docker-compose.yml
+■■■ .gitignore
+■■■ README.md
+
+
+=== PAGE 5 ===
+3. Frontend Files
+<b>App.jsx</b> — Routes the application and global layout.
+<b>main.jsx</b> — React entry point; mounts App.
+<b>index.css</b> — Global styling, Tailwind directives and responsive design.
+<b>Navbar.jsx</b> — Brand, navigation and user actions.
+<b>Sidebar.jsx</b> — Dashboard/project navigation.
+<b>UploadBox.jsx</b> — Image/floor-plan upload with validation.
+<b>ImagePreview.jsx</b> — Shows uploaded image and metadata.
+<b>AnalysisProgress.jsx</b> — Shows workflow progress.
+<b>AgentStatus.jsx</b> — Shows each agent as pending/running/completed/failed.
+<b>AgentActivity.jsx</b> — Live/refreshable execution trace: agent, action, status and timestamp.
+<b>MaterialTable.jsx</b> — Material, quantity, unit, unit price and estimated cost.
+<b>CostSummary.jsx</b> — Subtotal, delivery estimate and total reference cost.
+<b>SupplierTable.jsx</b> — Compare supplier price, distance, stock and rating.
+<b>ConstructionPlan.jsx</b> — Construction stages and procurement timing.
+<b>ApprovalDialog.jsx</b> — Human approval before procurement action.
+<b>services/api.js</b> — Axios/fetch base client and error handling.
+<b>analysisService.js</b> — Upload image, start analysis, poll status and retrieve result.
+<b>projectService.js</b> — Create/list/get/update projects.
+<b>App context/hooks</b> — Maintain authentication, project and analysis state.
+4. Backend Files
+<b>main.py</b> — Creates FastAPI app, middleware, CORS and API routers.
+<b>config.py</b> — Loads environment variables and application settings.
+<b>database.py</b> — SQLAlchemy engine/session configuration.
+<b>dependencies.py</b> — Database session and authentication dependencies.
+<b>api/*.py</b> — REST endpoints. Keep HTTP handling separate from agent/business logic.
+<b>models/*.py</b> — SQLAlchemy ORM entities.
+<b>schemas/*.py</b> — Pydantic request/response validation.
+<b>services/*.py</b> — Business operations used by API routes and agents.
+<b>tools/*.py</b> — Deterministic capabilities that agents can call.
+<b>workflows/*.py</b> — LangGraph/state-machine workflow definitions.
+<b>tests/*.py</b> — Unit and integration tests.
+5. Agent Responsibilities
+<b>orchestrator.py</b> — Maintains state, selects next agent/tool, handles dependencies, verification failures and
+replanning.
+
+
+=== PAGE 6 ===
+<b>intent_agent.py</b> — Converts user request into a structured goal and constraints.
+<b>vision_agent.py</b> — Analyzes image/floor plan and returns detected structural information with confidence.
+<b>estimation_agent.py</b> — Chooses required calculation tools and combines dimension inputs with construction
+assumptions.
+<b>material_agent.py</b> — Maps calculated requirements to standardized materials and units.
+<b>cost_agent.py</b> — Retrieves reference/supplier prices and calculates totals using deterministic tools.
+<b>supplier_agent.py</b> — Searches and ranks suppliers by price, stock, distance and rating.
+<b>planning_agent.py</b> — Builds staged material procurement plan.
+<b>delivery_agent.py</b> — Creates a delivery plan using supplier location, quantities and timing.
+<b>procurement_agent.py</b> — Creates a quotation/order draft; never submits a purchase without approval.
+<b>verification_agent.py</b> — Checks calculations, units, missing data, inventory, prices and contradictions. Sends
+failures back to orchestrator.
+6. Tool Responsibilities
+<b>quantity_calculator.py</b> — Shared deterministic quantity calculation interface.
+<b>concrete.py</b> — Concrete volume calculations based on supplied dimensions/assumptions.
+<b>cement.py</b> — Cement quantity conversion using documented assumptions.
+<b>sand.py</b> — Sand quantity conversion using documented assumptions.
+<b>aggregate.py</b> — Aggregate quantity conversion.
+<b>bricks.py</b> — Brick/block quantity from wall dimensions and selected block/brick size.
+<b>steel.py</b> — Preliminary steel estimate using configured project assumptions; clearly label as approximate.
+<b>paint.py</b> — Paint area/coverage calculation.
+<b>cost_calculator.py</b> — Quantity × price plus optional delivery charges.
+<b>supplier_search.py</b> — Database/API search and ranking.
+<b>inventory_checker.py</b> — Checks stock sufficiency.
+<b>distance_calculator.py</b> — Calculates distance from project to supplier using coordinates or maps API.
+<b>delivery_planner.py</b> — Creates feasible delivery batches.
+<b>image_analysis_tool.py</b> — Adapter around detector/image model.
+
+
+=== PAGE 7 ===
+7. End-to-End Agent Workflow
+ 1. User creates project and enters location, building type and dimensions.
+2. User uploads construction image/floor plan.
+3. Intent Agent creates structured goal.
+4. Orchestrator creates execution plan.
+5. Vision Agent analyzes the image and returns detected elements + confidence.
+6. Orchestrator checks whether required dimensions are available.
+7. If missing, system asks user for the missing dimensions.
+8. Estimation Agent calls deterministic quantity tools.
+9. Material Agent normalizes the output.
+10. Cost Agent obtains reference/supplier prices.
+11. Supplier Agent searches and ranks suppliers.
+12. Planning Agent creates staged procurement plan.
+13. Delivery Agent creates delivery schedule.
+14. Verification Agent validates all intermediate/final results.
+15. If verification fails, Orchestrator identifies the failed step and replans.
+16. If verification passes, show complete recommendation.
+17. User reviews and approves.
+18. Procurement Agent creates the final procurement draft.
+19. Agent log is stored for audit/demo.
+8. Example Structured State
+ {
+  "project_id": 101,
+  "goal": "estimate_materials_and_create_procurement_plan",
+  "building": {
+    "type": "residential",
+    "floor_area_sqft": 1500,
+    "dimensions_source": "user_input"
+  },
+  "vision": {
+    "rooms": 5,
+    "doors": 4,
+    "windows": 6,
+    "confidence": 0.87
+  },
+  "materials": [],
+  "cost": {},
+  "suppliers": [],
+  "delivery_plan": [],
+  "verification": {
+    "status": "pending",
+    "issues": []
+  },
+  "approval": {
+    "required": true,
+    "status": "pending"
+  }
+}
+9. Database Tables
+ Table
+Purpose
+users
+Authentication and user profile
+projects
+Construction projects and location
+buildings
+Building type, dimensions and assumptions
+images
+Uploaded construction images/floor plans
+building_analysis
+Vision results and confidence
+materials
+Standard material catalog and units
+material_prices
+Supplier-specific/reference material prices
+suppliers
+Retailer information and location
+supplier_inventory
+Supplier stock by material
+quotations
+Generated cost quotations
+procurement
+Approved procurement plans/orders
+
+
+=== PAGE 8 ===
+Table
+Purpose
+delivery_plans
+Delivery batches and schedules
+agent_logs
+Agent actions, tool calls, statuses and outputs
+10. Minimum API Endpoints
+ POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/projects
+POST   /api/projects
+GET    /api/projects/{project_id}
+POST   /api/analysis/upload/{project_id}
+POST   /api/analysis/run/{project_id}
+GET    /api/analysis/{project_id}/status
+GET    /api/analysis/{project_id}/result
+GET    /api/materials/{project_id}
+GET    /api/suppliers?material_id=...&project_id=...
+POST   /api/procurement/quote/{project_id}
+POST   /api/procurement/approve/{project_id}
+GET    /api/agents/{project_id}/logs
+11. Environment Variables
+ # backend/.env
+DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/construct_ai
+SECRET_KEY=replace_with_secure_secret
+LLM_PROVIDER=your_provider
+LLM_API_KEY=your_key
+VISION_PROVIDER=your_provider
+VISION_API_KEY=your_key
+MAPS_API_KEY=optional
+UPLOAD_DIR=./uploads
+CHROMA_DIR=./chroma
+# frontend/.env
+VITE_API_BASE_URL=http://localhost:8000/api
+12. Backend Dependencies
+ fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+sqlalchemy
+psycopg2-binary
+alembic
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+httpx
+Pillow
+opencv-python
+numpy
+ultralytics
+langgraph
+langchain
+langchain-community
+chromadb
+pytest
+13. Frontend Dependencies
+ react
+react-dom
+react-router-dom
+axios
+lucide-react
+14. Antigravity Generation Instructions
+ Generate a production-structured full-stack web application named Construct-AI using the exact folder/file structure in this specification.
+
+
+=== PAGE 9 ===
+Requirements:
+1. Frontend: React + Vite + Tailwind CSS, responsive desktop/mobile UI.
+2. Backend: Python FastAPI + PostgreSQL + SQLAlchemy.
+3. Agent orchestration: LangGraph/stateful workflow.
+4. Implement specialized agents: Intent, Vision, Estimation, Material, Cost, Supplier, Planning, Delivery, Procurement, Verification.
+5. Implement deterministic calculation tools. Never ask the LLM to invent engineering quantities or prices.
+6. Use uploaded image/floor plan + user-supplied dimensions for the MVP.
+7. Build a visible Agent Activity panel showing agent status, actions, timestamps and verification.
+8. Add human approval before procurement.
+9. Add agent logs/audit trail.
+10. Seed realistic demo suppliers/materials/inventory.
+11. Provide mock/fallback provider adapters so the application can run without paid AI APIs during development.
+12. Include validation, error handling, loading states and empty states.
+13. Include API documentation and README with exact setup commands.
+14. Add unit tests for calculations and core agent workflow.
+15. Do not make medical, structural-engineering or purchasing claims that imply guaranteed accuracy. Display clear preliminary-estimate disclaimers.
+16. Make the UI look like a professional construction technology platform, not a generic chatbot.
+17. Ensure frontend and backend are connected and the complete happy-path demo works:
+    create project → upload image → enter dimensions → run analysis → see agent trace → see materials → cost → suppliers → verification → approval → procurement plan.
+15. MVP Demonstration Scenario
+ Project: 2BHK Residential House
+Built-up area: 1500 sq ft
+Location: Hyderabad
+Input: sample construction image/floor plan + user dimensions
+Demo:
+1. Click New Project.
+2. Enter building details.
+3. Upload image/floor plan.
+4. Click Start AI Analysis.
+5. Show Intent Agent.
+6. Show Vision Agent.
+7. Show Estimation Agent calling quantity tools.
+8. Show Material Agent.
+9. Show Cost Agent.
+10. Show Supplier Agent comparing 3–5 demo suppliers.
+11. Show Planning/Delivery Agent.
+12. Show Verification Agent.
+13. If verification passes, show recommendation.
+14. User clicks Approve.
+15. Procurement draft appears.
+16. Development Order
+Build in this order: (1) React shell and pages, (2) FastAPI server, (3) PostgreSQL models/schema, (4) image upload,
+(5) dimension input, (6) calculation engine, (7) Vision Agent adapter, (8) Orchestrator workflow, (9)
+Material/Cost/Supplier agents, (10) Verification and replanning, (11) Procurement approval, (12) agent activity UI, (13)
+authentication, (14) tests, (15) Docker/deployment.
+17. Critical Design Rules
+ LLM plans and reasons; tools calculate.
+ Prices come from databases/APIs, not hallucinated LLM knowledge.
+ Engineering quantities are preliminary estimates and must be reviewed by a qualified professional before actual
+construction.
+ One ordinary photo is not treated as a precise dimensional measurement source.
+ Procurement is draft-first and approval-gated.
+ Every agent action is logged.
+ Verification can reject a plan and trigger replanning.
+ External API failures have mock/fallback behavior for the student demo.
+ Never expose secret API keys in frontend code.
+
+
