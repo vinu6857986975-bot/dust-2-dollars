@@ -1,6 +1,13 @@
-DUST 2 DOLLARS — LIVE 24/7 GLOBAL CLOUD URL
+﻿DUST 2 DOLLARS — REPOSITORY & LIVE DEPLOYMENT URLS
 ===================================================================
-Permanent Cloud URL (Any device, anywhere, 24/7): https://neutral-veil-s5yb86f.shipstatic.com
-No local terminal or Antigravity needed! Works directly in any browser.
+1. GitHub Repository:
+   https://github.com/vinu6857986975-bot/dust-2-dollars
+
+2. GitHub Pages (Live 24/7 Global URL):
+   https://vinu6857986975-bot.github.io/dust-2-dollars/
+
+3. Alternative Global Cloud Mirror:
+   https://neutral-veil-s5yb86f.shipstatic.com
+
+No local terminal or Antigravity needed! Works directly in any browser on any device.
 ===================================================================
-Claim Ownership (optional): https://my.shipstatic.com/claim/8ff266415303e45c010d224a8cc82f6a
