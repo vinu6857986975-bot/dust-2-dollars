@@ -1,18 +1,20 @@
 ﻿DUST 2 DOLLARS — REPOSITORY & LIVE DEPLOYMENT URLS
 ===================================================================
-1. Target GitHub Repository (chanti722636-code):
-   Repo:  https://github.com/chanti722636-code/Dust-2-dollar
-   Live:  https://chanti722636-code.github.io/Dust-2-dollar/
+1. Primary Live GitHub Pages Website:
+   https://chanti722636-code.github.io/Dust-2-dollar/
 
-2. Secondary GitHub Repository (vinu6857986975-bot):
-   Repo:  https://github.com/vinu6857986975-bot/dust-2-dollars
-   Live:  https://vinu6857986975-bot.github.io/dust-2-dollars/
-
-3. Standalone Global Cloud Mirror (24/7):
-   Live:  https://neutral-veil-s5yb86f.shipstatic.com
-
-Direct App Route:
+2. Direct Web App Route:
    https://chanti722636-code.github.io/Dust-2-dollar/dead-stock-agent/index.html
 
-No local terminal or Antigravity needed! Works 24/7 on any device.
+3. GitHub Repository:
+   https://github.com/chanti722636-code/Dust-2-dollar
+
+4. Secondary GitHub Repository:
+   https://github.com/vinu6857986975-bot/dust-2-dollars
+   Live: https://vinu6857986975-bot.github.io/dust-2-dollars/
+
+5. Standalone 24/7 Global Cloud Mirror:
+   https://pure-bot-zu6yng2.shipstatic.com
+
+No local terminal or Antigravity needed! Runs 24/7 on any device.
 ===================================================================
