@@ -81,7 +81,7 @@ const MockBackend = {
     { id: 22, sku: 'HMK002', name: "Stainless Steel Water Bottle 1L", category_name: 'Home & Kitchen', brand: 'AquaKeep', cost_price: 300, selling_price: 699, mrp: 899, quantity: 25, age_days: 70, stock_status: 'dead', monthly_sales: 8, supplier_name: 'HomeStyle Vendors', return_window: 0, return_allowed: 0 },
     { id: 23, sku: 'HMK003', name: "Electric Kettle 1.7L", category_name: 'Home & Kitchen', brand: 'BrewQuick', cost_price: 750, selling_price: 1799, mrp: 2199, quantity: 18, age_days: 28, stock_status: 'healthy', monthly_sales: 22, supplier_name: 'HomeStyle Vendors', return_window: 0, return_allowed: 0 },
     { id: 24, sku: 'BOK001', name: "Python Programming Handbook", category_name: 'Books & Stationery', brand: 'CodePress', cost_price: 350, selling_price: 699, mrp: 850, quantity: 50, age_days: 45, stock_status: 'healthy', monthly_sales: 20, supplier_name: 'BookWorld Distributors', return_window: 0, return_allowed: 0 },
-    { id: 25, sku: 'BOK002', name: "Business Strategy Collection (3)", category_name: 'Books & Stationery', brand: 'MindBooks', cost_price: 900,メル: 1799, mrp: 2199, quantity: 30, age_days: 50, stock_status: 'healthy', monthly_sales: 15, supplier_name: 'BookWorld Distributors', return_window: 0, return_allowed: 0 },
+    { id: 25, sku: 'BOK002', name: "Business Strategy Collection (3)", category_name: 'Books & Stationery', brand: 'MindBooks', cost_price: 900, selling_price: 1799, mrp: 2199, quantity: 30, age_days: 50, stock_status: 'healthy', monthly_sales: 15, supplier_name: 'BookWorld Distributors', return_window: 0, return_allowed: 0 },
     { id: 26, sku: 'WIN001', name: "Woolen Muffler (Unisex)", category_name: 'Winter Wear', brand: 'WarmWrap', cost_price: 250, selling_price: 599, mrp: 799, quantity: 90, age_days: 110, stock_status: 'critical', monthly_sales: 4, supplier_name: 'WinterWear Wholesale', return_window: 20, return_allowed: 1 },
     { id: 27, sku: 'WIN002', name: "Men's Parka Jacket (L)", category_name: 'Winter Wear', brand: 'ArcticStyle', cost_price: 2200, selling_price: 4999, mrp: 5999, quantity: 35, age_days: 250, stock_status: 'critical', monthly_sales: 1, supplier_name: 'WinterWear Wholesale', return_window: 20, return_allowed: 1 },
     { id: 28, sku: 'WIN003', name: "Thermal Innerwear Set", category_name: 'Winter Wear', brand: 'HeatLayer', cost_price: 600, selling_price: 1299, mrp: 1599, quantity: 60, age_days: 88, stock_status: 'dead', monthly_sales: 7, supplier_name: 'WinterWear Wholesale', return_window: 20, return_allowed: 1 },
@@ -148,9 +148,70 @@ const MockBackend = {
       };
     }
 
+    // Inventory
+    if (path.startsWith('/inventory')) {
+      let items = this.products.map(p => {
+        const age = Number(p.age_days) || 0;
+        const stockSinceDate = p.stock_since || new Date(Date.now() - age * 86400000).toISOString().split('T')[0];
+        return {
+          ...p,
+          age_days: age,
+          category: p.category_name || p.category || 'General',
+          supplier: p.supplier_name || p.supplier || 'Vendor',
+          stock_since: stockSinceDate,
+          locked_value: p.locked_value || ((p.cost_price || 0) * (p.quantity || 0)),
+          last_sale_date: p.last_sale_date || stockSinceDate
+        };
+      });
+
+      if (path.includes('status=dead')) {
+        items = items.filter(p => p.age_days >= 60);
+      } else if (path.includes('status=critical')) {
+        items = items.filter(p => p.age_days >= 90);
+      } else if (path.includes('status=healthy')) {
+        items = items.filter(p => p.age_days < 30);
+      } else if (path.includes('status=at_risk')) {
+        items = items.filter(p => p.age_days >= 30 && p.age_days < 60);
+      }
+
+      return { inventory: items, total: items.length };
+    }
+
     // Products
     if (path.startsWith('/products')) {
-      return { products: this.products, total: this.products.length, page: 1, limit: 30 };
+      const items = this.products.map(p => {
+        const age = Number(p.age_days) || 0;
+        const stockSinceDate = p.stock_since || new Date(Date.now() - age * 86400000).toISOString().split('T')[0];
+        return { ...p, stock_since: stockSinceDate };
+      });
+      return { products: items, total: items.length, page: 1, limit: 30 };
+    }
+
+    // Rules
+    if (path.startsWith('/rules')) {
+      return {
+        status: 'ok',
+        rules: [
+          { id: 1, name: 'Vendor Return Invariant', category: 'Compliance', condition: 'age_days <= return_window', action: 'Return to Vendor', priority: 1, enabled: 1 },
+          { id: 2, name: 'Critical Clearance Policy', category: 'Liquidation', condition: 'age_days >= 90', action: '35% Flash Sale', priority: 2, enabled: 1 },
+          { id: 3, name: 'Slow Mover Bundle Shield', category: 'Pricing', condition: 'age_days >= 60 && velocity < 5', action: 'Bundle Pairing', priority: 3, enabled: 1 }
+        ]
+      };
+    }
+
+    // Settings
+    if (path === '/settings') {
+      return {
+        status: 'ok',
+        settings: [
+          { key: 'store_name', label: 'Store Name', value: 'DUST 2 DOLLARS Flagship Store', type: 'text' },
+          { key: 'currency_symbol', label: 'Currency Symbol', value: '₹', type: 'text' },
+          { key: 'dead_stock_days', label: 'Dead Stock Age Threshold (Days)', value: '60', type: 'number' },
+          { key: 'critical_days', label: 'Critical Risk Threshold (Days)', value: '90', type: 'number' },
+          { key: 'max_discount_pct', label: 'Max Autonomous Discount %', value: '40', type: 'number' },
+          { key: 'openai_model', label: 'AI Reasoning Model', value: 'gpt-4o-mini', type: 'text' }
+        ]
+      };
     }
 
     // Decision Analysis Engine
@@ -802,22 +863,72 @@ const App = {
 
   async loadFormOptions() {
     try {
-      const invData = await API.get('/inventory?status=all');
-      State.inventory = invData.inventory || [];
+      let rawList = [];
+      try {
+        const invData = await API.get('/inventory?status=all');
+        if (invData && Array.isArray(invData.inventory)) {
+          rawList = invData.inventory;
+        } else if (invData && Array.isArray(invData.products)) {
+          rawList = invData.products;
+        } else if (Array.isArray(invData)) {
+          rawList = invData;
+        }
+      } catch(fetchErr) {
+        console.warn('[DUST 2 DOLLARS] Falling back to MockBackend products:', fetchErr);
+      }
+
+      // Fallback to MockBackend.products if empty
+      if (!rawList || !rawList.length) {
+        if (typeof MockBackend !== 'undefined' && Array.isArray(MockBackend.products)) {
+          rawList = MockBackend.products;
+        }
+      }
+
+      State.inventory = rawList || [];
       const productSelect = document.getElementById('analyzeProduct');
       if (productSelect) {
-        const aged = invData.inventory
-          .filter(p => p.age_days >= 20)
-          .sort((a, b) => b.age_days - a.age_days);
+        // Defensive mapping to ensure every product has required numeric & date fields
+        const safeItems = (Array.isArray(rawList) ? rawList : []).map(p => {
+          const age = Number(p.age_days) || 0;
+          const since = p.stock_since || new Date(Date.now() - age * 86400000).toISOString().split('T')[0];
+          return {
+            ...p,
+            age_days: age,
+            quantity: Number(p.quantity) || 0,
+            monthly_sales: Number(p.monthly_sales) || 0,
+            stock_since: since
+          };
+        });
+
+        // Filter for products that need attention (age >= 20 days), or all if none qualify
+        let aged = safeItems.filter(p => p.age_days >= 20);
+        if (!aged.length && safeItems.length) {
+          aged = safeItems;
+        }
+        aged.sort((a, b) => b.age_days - a.age_days);
+
+        if (aged.length === 0) {
+          productSelect.innerHTML = '<option value="">— No aged products found —</option>';
+          return;
+        }
+
         productSelect.innerHTML = '<option value="">— Select a product to analyze —</option>' +
           aged.map(p => `<option value="${p.id}"
             data-age="${p.age_days}" data-qty="${p.quantity}"
             data-sales="${p.monthly_sales}" data-since="${p.stock_since}">
             ${p.name} (${p.age_days}d old · ${p.quantity} units)
           </option>`).join('');
+
         productSelect.onchange = () => this.onProductSelect(productSelect);
+
+        // Auto-select top aged product if none selected yet
+        if (!productSelect.value && aged.length > 0) {
+          productSelect.value = aged[0].id;
+          this.onProductSelect(productSelect);
+        }
       }
     } catch(e) {
+      console.error('Error in loadFormOptions:', e);
       Toast.error('Failed to load product list: ' + e.message);
     }
   },
